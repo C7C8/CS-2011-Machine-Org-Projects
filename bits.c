@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * Christopher Myers (crmyers)
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -13,6 +13,7 @@
  * case it's OK.  
  */
 
+#define BIT(x) (1 << x)
 #if 0
 /*
  * Instructions to Students:
