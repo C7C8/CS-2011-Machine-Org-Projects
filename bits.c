@@ -171,6 +171,14 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
+
+char* bytestr(int byte) {
+	char *str = malloc(32); //hey look, a memory leak!
+	for (char i = 0; i < 32; i++)
+		str[31 - i] = (1 << i) & byte ? '1' : '0';
+	return str;
+}
+
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
 	return 0xAA | (0xAA<<8) | (0xAA<<16) | (0xAA<<24);
@@ -208,7 +216,17 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-	return 2;
+	printf("\n\nx: %s\ny: %s\nz: %s\n", bytestr(x), bytestr(y), bytestr(z));	
+
+	//Form a mask out of x; X is always passed in as 0x8<<28 (INT_MIN) when x is to be interpreted as true
+	//This can be exploited: shifting it over by 31 will result in all 1's when x=INT_MIN, but when x!=INT_MIN,
+	//it will result in all zeros!
+
+	int ly = (x>>31) & y; 
+	int lz = ~(x>>31) & z;
+	int result = ly | lz;
+	//printf("Returning %s\n", bytestr(result));
+	return result;
 }
 
 /* 
