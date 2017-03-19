@@ -12,8 +12,7 @@
  * it's not good practice to ignore compiler warnings, but in this
  * case it's OK.  
  */
-
-#define BIT(x) (1 << x)
+#include <limits.h>
 #if 0
 /*
  * Instructions to Students:
@@ -165,6 +164,7 @@ NOTES:
    synchronized with ISO/IEC 10646:2014, plus Amendment 1 (published
    2015-05-15).  */
 /* We do not support C11 <threads.h>.  */
+
 /* 
  * oddBits - return word with all odd-numbered bits set to 1
  *   Legal ops: ! ~ & ^ | + << >>
@@ -172,8 +172,10 @@ NOTES:
  *   Rating: 2
  */
 int oddBits(void) {
-  return 2;
+	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
+	return 0xAA | (0xAA<<8) | (0xAA<<16) | (0xAA<<24);
 }
+
 /*
  * isTmin - returns 1 if x is the minimum, two's complement number,
  *     and 0 otherwise 
@@ -181,9 +183,11 @@ int oddBits(void) {
  *   Max ops: 10
  *   Rating: 1
  */
-int isTmin(int x) {
-  return 2;
+int isTmin(int x){
+	//todo: unfuck this
+	return x == INT_MIN;
 }
+
 /* 
  * bitXor - x^y using only ~ and & 
  *   Example: bitXor(4, 5) = 1
@@ -192,8 +196,10 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+	//Logical equivalent of (x | y) & ~(x & y), found using DeMorgan's laws
+	return ~(~x & ~y) & ~(x & y);
 }
+
 /* 
  * conditional - same as x ? y : z 
  *   Example: conditional(2,4,5) = 4
@@ -202,8 +208,9 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+	return 2;
 }
+
 /* 
  * greatestBitPos - return a mask that marks the position of the
  *               most significant 1 bit. If x == 0, return 0
@@ -213,8 +220,9 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+	return 2;
 }
+
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
  *  Round toward zero
@@ -224,8 +232,9 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+	return 2;
 }
+
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
  *   Example: isNonNegative(-1) = 0.  isNonNegative(0) = 1.
@@ -234,8 +243,9 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return 2;
+	return 2;
 }
+
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
  *   Examples: satMul2(0x30000000) = 0x60000000
@@ -246,8 +256,9 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  return 2;
+	return 2;
 }
+
 /* 
  * isLess - if x < y  then return 1, else return 0 
  *   Example: isLess(4,5) = 1.
@@ -256,8 +267,9 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  return 2;
+	return 2;
 }
+
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
  *   Example: isAsciiDigit(0x35) = 1.
@@ -268,8 +280,9 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+	return 2;
 }
+
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
  *   avoiding errors due to overflow
@@ -282,8 +295,9 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-  return 2;
+	return 2;
 }
+
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
  *   Example: ilog2(16) = 4
@@ -292,8 +306,9 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+	return 2;
 }
+
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
  *   floating point argument f.
@@ -306,8 +321,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	return 2;
 }
+
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
  *   Result is returned as unsigned int, but
@@ -318,8 +334,9 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+	return 2;
 }
+
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
@@ -332,5 +349,5 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+	return 2;
 }
