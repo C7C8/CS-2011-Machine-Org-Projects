@@ -171,12 +171,12 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-char* bytestr(int byte) {
+/*char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
 		str[31 - i] = (1 << i) & byte ? '1' : '0';
 	return str;
-}
+}*/
 
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
@@ -218,8 +218,8 @@ int bitXor(int x, int y) {
 int conditional(int x, int y, int z) {
 	//Form a mask out of X by reducing it to a 0 or a 1, left shifting it, then exploiting rightshift's
 	//duplicate-most-significant-bit behavior.
-	x=!!x; //reduce it to a 1 or a 0
-	return (((x<<31)>>31) & y) | (~((x<<31)>>31) & z);
+	x=((!!x<<31)>>31);
+	return (x & y) | (~x & z);
 }
 
 /* 
