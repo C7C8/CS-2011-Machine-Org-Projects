@@ -245,7 +245,17 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-	return 2;
+	//Uses the fact that dividing by 2^n is a simple right shift when X is positive.
+	//When X is negative, rounding is done incorrectly so a bias value must be added
+	//in the form of 1<<n, forcing rounding to happen upwards rather than downwards
+	//instead. A simple masking procedure -- basically imported from conditional() --
+	//is used to determine which computed value should be returned. Adding (1<<31)>>31 
+	//is just a hack for subtracting 1 - it's adding negative 1, but dlc won't let me
+	//do that directly...
+	int positive = x >> n;
+	int negative = (x + (1 << n) + ((1 << 31) >> 31)) >> n;
+	int mask = x >> 31;
+	return (~mask & positive) | (mask & negative);
 }
 
 /* 
