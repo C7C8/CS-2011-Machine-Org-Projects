@@ -171,7 +171,6 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -192,10 +191,13 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x){
-	//Adds one to x so it goes to 1000...01, eliminates the leading two's complement 0, then checks
+	//Adds one to x so it goes to 1000...01, eliminates the leading two's complement 1, then checks
 	//if the result = 1. & !!x at the end accounts for the special case where x is 0 and forces a
 	//return 0.
-	return !((((x + 1) << 1) >> 1) + -1) & !!x;
+	printf("\nx:\t%s\n", bytestr(x));
+		int temp = ((x + 1) & ~0);
+	printf("temp:\t%s\n", bytestr(temp));
+	return !(temp + -1) & !!x;
 }
 
 /* 
@@ -258,7 +260,7 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-	return 2;
+	return !((1<<31) & x);
 }
 
 /*
