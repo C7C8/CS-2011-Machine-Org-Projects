@@ -191,13 +191,9 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x){
-	//Adds one to x so it goes to 1000...01, eliminates the leading two's complement 1, then checks
-	//if the result = 1. & !!x at the end accounts for the special case where x is 0 and forces a
-	//return 0.
-	printf("\nx:\t%s\n", bytestr(x));
-		int temp = ((x + 1) & ~0);
-	printf("temp:\t%s\n", bytestr(temp));
-	return !(temp + -1) & !!x;
+	//Adds X to itself, causing to go to zero iff x=INT_MIN. !!x is and'd on to account for the special
+	//case where x=0.
+	return !(x+x) & !!x;
 }
 
 /* 
