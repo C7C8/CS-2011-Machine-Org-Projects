@@ -181,7 +181,7 @@ char* bytestr(int byte) {
 
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
-	return 0xAA | (0xAA<<8) | (0xAA<<16) | (0xAA<<24);
+	return 0xAA | (0xAA << 8) | (0xAA << 16) | (0xAA << 24);
 }
 
 /*
@@ -192,7 +192,10 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x){
-	return !((((x+1)<<1)>>1) + -1) & !!x;
+	//Adds one to x so it goes to 1000...01, eliminates the leading two's complement 0, then checks
+	//if the result = 1. & !!x at the end accounts for the special case where x is 0 and forces a
+	//return 0.
+	return !((((x + 1) << 1) >> 1) + -1) & !!x;
 }
 
 /* 
