@@ -192,8 +192,7 @@ int oddBits(void) {
  *   Rating: 1
  */
 int isTmin(int x){
-	//todo: unfuck this
-	return x == INT_MIN;
+	return !((((x+1)<<1)>>1) + -1) & !!x;
 }
 
 /* 
@@ -216,11 +215,10 @@ int bitXor(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-	//Form a mask out of x -- if x = INT_MIN or INT_MAX, z will be masked out; otherwise, y will be masked out.
-	//The two masked numbers are combined (one will be all 0s) and returned. This exploits the fact that the
-	//autograder only ever tests with INT_MIN or INT_MAX for x, and the fact that the most significant bit
-	//will be replicated when a rightshift happens.
-	return (((x>>31) | ((x<<31)>>31)) & y) | (~((x>>31) | ((x<<31)>>31)) & z);
+	//Form a mask out of X by reducing it to a 0 or a 1, left shifting it, then exploiting rightshift's
+	//duplicate-most-significant-bit behavior.
+	x=!!x; //reduce it to a 1 or a 0
+	return (((x<<31)>>31) & y) | (~((x<<31)>>31) & z);
 }
 
 /* 
@@ -232,7 +230,9 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-	return 2;
+	int mask = 0;
+
+	return mask;
 }
 
 /* 
