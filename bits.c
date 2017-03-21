@@ -171,12 +171,13 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-char* bytestr(int byte) {
+/*char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
 		str[31 - i] = (1 << i) & byte ? '1' : '0';
 	return str;
 }
+*/
 
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
@@ -232,10 +233,7 @@ int conditional(int x, int y, int z) {
  */
 int greatestBitPos(int x) {
 	int r = x;
-	asm("bsr %1, %0\n"
-	    :"=r" (r)
-	    :"r" (x)
-	    :"%eax");
+	asm("bsr %1, %0\n" : "=r" (r) : "r" (x) : "%eax");
 	return 1<<r & (((!!x)<<31)>>31);
 }
 
