@@ -171,13 +171,14 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-/*char* bytestr(int byte) {
+#if 0
+char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
 		str[31 - i] = (1 << i) & byte ? '1' : '0';
 	return str;
 }
-*/
+#endif
 
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
@@ -232,9 +233,17 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+	//Form a mask by OR'ing the number with itself rightshifted. This results in a number 000...111
+	//((r+1)>>1 in the final line clears the preceeding bits, AND'ing that with 1<<31 clears the sign
+	//bit, and OR'ing the whole thing with x & (1<<31) accounts for the special case where x=INT_MIN.
 	int r = x;
-	asm("bsr %1, %0\n" : "=r" (r) : "r" (x) : "%eax");
-	return 1<<r & (((!!x)<<31)>>31);
+	const int int_min = 1 << 31;
+	r |= r >> 1;
+	r |= r >> 2;
+	r |= r >> 4;
+	r |= r >> 8;
+	r |= r >> 16;
+	return (((r + 1) >> 1) & ~int_min) | (x & int_min);
 }
 
 /* 
@@ -280,7 +289,20 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-	return x << 1;
+	const int int_max = ((1<<31)>>31) ^ (1<<31);
+	const int int_min = 1<<31;
+	const int sign = x >> 31;
+	//printf("\n");
+	int res = x << 1;
+	//Check if the sign has changed
+	int ressign = (res >> 31) ^ (x >> 31);
+	int overflow = (sign & int_min) | (~sign & int_max);
+	//printf("r:%s\n", bytestr(res));
+	//printf("o:%s\n", bytestr(overflow));
+	//printf("s:%s\n", bytestr(ressign));
+	res = (~ressign & res) | (ressign & overflow);
+	//printf("r:%s\n", bytestr(res));
+	return res;
 }
 
 /* 
@@ -291,7 +313,8 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-	return 2;
+	int res = x + (y | (1<<31));
+	return (!!res) & (res & (1<<31));
 }
 
 /* 
