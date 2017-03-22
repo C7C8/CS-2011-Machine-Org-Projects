@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 0
+#if 1
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -289,19 +289,24 @@ int isNonNegative(int x) {
  *   Rating: 3
  */
 int satMul2(int x) {
-	const int int_max = ((1<<31)>>31) ^ (1<<31);
-	const int int_min = 1<<31;
+	/*
+	 * Calculates the saturated multiplication in four phases:
+	 * 1. Find the result of the multiplication by a simple left shift.
+	 * 2. Form a mask of the resulting sign, but only set it if the sign changed
+	 *    between the result and the original number.
+	 * 3. Using the sign mask of the original number, determine what the saturated
+	 *    result should be.
+	 * 4. Determine whether to return the calculated result or the saturated result.
+	 *
+	 * conditional()-inspired code is used in phases 3 and 4.
+	 */
+	const int int_min = 1 << 31;
+	const int int_max = (int_min >> 31) ^ int_min;
 	const int sign = x >> 31;
-	//printf("\n");
 	int res = x << 1;
-	//Check if the sign has changed
 	int ressign = (res >> 31) ^ (x >> 31);
-	int overflow = (sign & int_min) | (~sign & int_max);
-	//printf("r:%s\n", bytestr(res));
-	//printf("o:%s\n", bytestr(overflow));
-	//printf("s:%s\n", bytestr(ressign));
-	res = (~ressign & res) | (ressign & overflow);
-	//printf("r:%s\n", bytestr(res));
+	int saturated = (sign & int_min) | (~sign & int_max);
+	res = (~ressign & res) | (ressign & saturated);
 	return res;
 }
 
@@ -327,7 +332,13 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-	return 2;
+	//Returns (x <= 0x39) && (x >= 0x30). Comparison is done by checking the sign
+	//on x - K where K is the relavent ASCII constant. The special case for equality
+	//is OR'd on to the end of each case.
+	const int int_min = 1 << 31;
+	int lt = !!((x + (~0x39 + 1)) & int_min) | !(x ^ 0x39);
+	int gt = !((x + (~0x30 + 1)) & int_min) | !(x ^ 0x30);
+	return gt & lt;
 }
 
 /*
