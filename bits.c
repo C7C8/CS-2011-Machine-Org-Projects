@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 0
+#if 1
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -336,11 +336,10 @@ int isLess(int x, int y) {
  */
 int isAsciiDigit(int x) {
 	//Returns (x <= 0x39) && (x >= 0x30). Comparison is done by checking the sign
-	//on x - K where K is the relavent ASCII constant. The special case for equality
-	//is OR'd on to the end of each case.
+	//on x - K where K is the relavent ASCII constant.
 	const int int_min = 1 << 31;
-	int lt = !!((x + (~0x39 + 1)) & int_min) | !(x ^ 0x39);
-	int gt = !((x + (~0x30 + 1)) & int_min) | !(x ^ 0x30);
+	int lt = !!((x + (~0x39)) & int_min); 
+	int gt = !((x + (~0x30 + 1)) & int_min); 
 	return gt & lt;
 }
 
@@ -356,23 +355,32 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
+	//Setup
 	printf("\n");
-	/*const int int_min = 1<<31;
-	int signmask = (x & int_min)>>31;
-	printf("s:\t%s\n", bytestr(signmask));
-	const int isHellMask = ((!(x ^ int_min))<<31)>>31;
-	printf("ihm:\t%s\n", bytestr(isHellMask));
-	printf("x:\t%s\n", bytestr(x));
-	x &= ~int_min; //strip off the negative
-	printf("x1\t%s\n", bytestr(x));
-	x >>= 2; //divide by 4
-	printf("x2\t%s\n", bytestr(x));
-	x = x + x + x;
-	printf("x3\t%s\n", bytestr(x));
-	int ret = (isHellMask & ((int_min >> 2) ^ (int_min >> 1) ^ int_min)) | (~isHellMask & ((~signmask & x) | (signmask & (~x + 1))));
-	printf("ret:\t%s\n", bytestr(ret));
-	return ret;*/
-	return divpwr2(x, 2) + divpwr2(x, 2) + divpwr2(x, 2);
+	const int int_min = 1<<31; //the funny thing about banning constants longer than 8 bits is that the compiler will optimize this out and into a 32-bit constant anyways...
+	const int sign = int_min & x;
+	int lastBits = x & 3;
+
+	printf("s:\t%s\n", bytestr(sign));
+	printf("lb0:\t%s\n", bytestr(lastBits));
+	printf("x0:\t%s\n", bytestr(x));
+	
+	//Perform division on x and multiplication on lastBits;
+	x >>= 2;
+	lastBits += lastBits + lastBits;
+	printf("lb-mul:\t%s\n", bytestr(lastBits));
+	printf("x-div:\t%s\n", bytestr(x));
+
+	//Perform multiplication on x and division on lastBits
+	x += x + x;
+	lastBits >>= 2;
+	printf("lb-div:\t%s\n", bytestr(lastBits));
+	printf("x-mul:\t%s\n", bytestr(x));
+
+	//Add the results together
+	x += lastBits;
+	printf("x-add:\t%s\n", bytestr(x));
+	return x;
 }
 
 /*
