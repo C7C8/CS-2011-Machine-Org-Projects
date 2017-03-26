@@ -451,9 +451,14 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-	if (uf >> 23 >= 0xFF)
+	//Check for NaN (all exponent) bits set, mantissa nonzero) and return
+	//the number if NaN, otherwise just flip the sign bit.
+	const int int_min = 1<<31;
+	const int exp = 0xFF & (uf>>23);
+	const int mts = ~(int_min>>8) & uf;
+	if (exp == 0xFF && mts > 0)
 		return uf;
-	return uf ^ (1<<31);
+	return uf ^ int_min;
 }
 
 /* 
