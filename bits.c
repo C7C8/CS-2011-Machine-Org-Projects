@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 1
+#if 0
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -318,8 +318,11 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-	int res = x + (y | (1<<31));
-	return (!!res) & (res & (1<<31));
+	//Check if x's sign bit is different than Y. If so, return x's sign bit; else, return
+	//whether x-y<0.
+	const int int_min = 1<<31;
+	int signMask = ((int_min & y) ^ (int_min & x))>>31;
+	return (signMask & !!(x & int_min)) | (~signMask & !!((x + (~y + 1)) & int_min));
 }
 
 /* 
@@ -353,7 +356,23 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	return 2;
+	printf("\n");
+	/*const int int_min = 1<<31;
+	int signmask = (x & int_min)>>31;
+	printf("s:\t%s\n", bytestr(signmask));
+	const int isHellMask = ((!(x ^ int_min))<<31)>>31;
+	printf("ihm:\t%s\n", bytestr(isHellMask));
+	printf("x:\t%s\n", bytestr(x));
+	x &= ~int_min; //strip off the negative
+	printf("x1\t%s\n", bytestr(x));
+	x >>= 2; //divide by 4
+	printf("x2\t%s\n", bytestr(x));
+	x = x + x + x;
+	printf("x3\t%s\n", bytestr(x));
+	int ret = (isHellMask & ((int_min >> 2) ^ (int_min >> 1) ^ int_min)) | (~isHellMask & ((~signmask & x) | (signmask & (~x + 1))));
+	printf("ret:\t%s\n", bytestr(ret));
+	return ret;*/
+	return divpwr2(x, 2) + divpwr2(x, 2) + divpwr2(x, 2);
 }
 
 /*
@@ -379,7 +398,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-	return 2;
+	if (uf >> 23 >= 0xFF)
+		return uf;
+	return uf ^ (1<<31);
 }
 
 /* 
