@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 1
+#if 0
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -356,30 +356,31 @@ int isAsciiDigit(int x) {
 int trueThreeFourths(int x)
 {
 	//Setup
-	printf("\n");
+//	printf("\n");
 	const int int_min = 1<<31; //the funny thing about banning constants longer than 8 bits is that the compiler will optimize this out and into a 32-bit constant anyways...
 	const int sign = int_min & x;
 	int lastBits = x & 3;
+	
 
-	printf("s:\t%s\n", bytestr(sign));
-	printf("lb0:\t%s\n", bytestr(lastBits));
-	printf("x0:\t%s\n", bytestr(x));
+//	printf("s:\t%s\n", bytestr(sign));
+//	printf("lb0:\t%s\n", bytestr(lastBits));
+//	printf("x0:\t%s\n", bytestr(x));
 	
 	//Perform division on x and multiplication on lastBits;
 	x >>= 2;
 	lastBits += lastBits + lastBits;
-	printf("lb-mul:\t%s\n", bytestr(lastBits));
-	printf("x-div:\t%s\n", bytestr(x));
+//	printf("lb-mul:\t%s\n", bytestr(lastBits));
+//	printf("x-div:\t%s\n", bytestr(x));
 
 	//Perform multiplication on x and division on lastBits
 	x += x + x;
 	lastBits >>= 2;
-	printf("lb-div:\t%s\n", bytestr(lastBits));
-	printf("x-mul:\t%s\n", bytestr(x));
+//	printf("lb-div:\t%s\n", bytestr(lastBits));
+//	printf("x-mul:\t%s\n", bytestr(x));
 
 	//Add the results together
 	x += lastBits;
-	printf("x-add:\t%s\n", bytestr(x));
+//	printf("x-add:\t%s\n", bytestr(x));
 	return x;
 }
 
@@ -391,7 +392,51 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-	return 2;
+	//Calculate the greatest bit position using the solution from the related function,
+	//then use that bit to form a mask. Then... brute force
+	int r = x;
+	const int int_min = 1<<31;
+	int gbp;
+	r |= r >> 1;
+	r |= r >> 2;
+	r |= r >> 4;
+	r |= r >> 8;
+	r |= r >> 16;
+	gbp = (((r + 1) >> 1) & ~int_min) | (x & int_min);
+
+	//Please hit me as hard as you can.
+	return (((gbp << 0) >> 31) & 31) |
+	       (((gbp << 1) >> 31) & 30) |
+	       (((gbp << 2) >> 31) & 29) |
+	       (((gbp << 3) >> 31) & 28) |
+	       (((gbp << 4) >> 31) & 27) |
+	       (((gbp << 5) >> 31) & 26) |
+	       (((gbp << 6) >> 31) & 25) |
+	       (((gbp << 7) >> 31) & 24) |
+	       (((gbp << 8) >> 31) & 23) |
+	       (((gbp << 9) >> 31) & 22) |
+	       (((gbp << 10) >> 31) & 21) |
+	       (((gbp << 11) >> 31) & 20) |
+	       (((gbp << 12) >> 31) & 19) |
+	       (((gbp << 13) >> 31) & 18) |
+	       (((gbp << 14) >> 31) & 17) |
+	       (((gbp << 15) >> 31) & 16) |
+	       (((gbp << 16) >> 31) & 15) |
+	       (((gbp << 17) >> 31) & 14) |
+	       (((gbp << 18) >> 31) & 13) |
+	       (((gbp << 19) >> 31) & 12) |
+	       (((gbp << 20) >> 31) & 11) |
+	       (((gbp << 21) >> 31) & 10) |
+	       (((gbp << 22) >> 31) & 9) |
+	       (((gbp << 23) >> 31) & 8) |
+	       (((gbp << 24) >> 31) & 7) |
+	       (((gbp << 25) >> 31) & 6) |
+	       (((gbp << 26) >> 31) & 5) |
+	       (((gbp << 27) >> 31) & 4) |
+	       (((gbp << 28) >> 31) & 3) |
+	       (((gbp << 29) >> 31) & 2) |
+	       (((gbp << 30) >> 31) & 1) |
+	       (((gbp << 31) >> 31) & 0);
 }
 
 /* 
