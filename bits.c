@@ -351,7 +351,7 @@ int trueThreeFourths(int x)
 
 	//Not divisible by 4 and is negative? Checks if the number is negative, if it's not divisible by four,
 	//and if one of the last two bits is set. If so, d4N holds a 1 that will be added onto the final result.
-	int d4N = !!sign & !!((x & 7) ^ 4) & !!lastBits;
+	int d4N = (sign >> 31) & !!((x & 7) ^ 4) & !!lastBits;
 	
 	//Perform division on x and multiplication on lastBits;
 	x >>= 2;
