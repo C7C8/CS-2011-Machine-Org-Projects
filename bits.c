@@ -471,6 +471,7 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
+	static int count = 0;
 	const unsigned int_min = 1<<31;
 	unsigned mantissa = 0;
 	unsigned exponent = 158;
@@ -480,7 +481,7 @@ unsigned float_i2f(int x) {
 		return 0;
 
 	printf("\n");
-	printf("Processing %s\n", bytestr(x));
+	printf("Processing test %d, %s\n", ++count, bytestr(x));
 	if (sign)
 	{
 		x = -x;
@@ -499,7 +500,7 @@ unsigned float_i2f(int x) {
 	x &= ~int_min;
 	mantissa = x >> 8;
 	printf("X: %s\n", bytestr(x));
-	printf("Mantissa: %s\n", bytestr(mantissa));
+	printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
 
 	//We need to know if the least significant bit AND the next bit are set, as the last
 	//8 bits are going to be cut off; if they are set
@@ -517,7 +518,7 @@ unsigned float_i2f(int x) {
 			exponent++;
 			mantissa = 0;
 			printf("X: %s\n", bytestr(x));
-			printf("Mantissa: %s\n", bytestr(mantissa));
+			printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
 			printf("Got exponent %d\n", exponent);
 		}
 	}
