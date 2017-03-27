@@ -497,7 +497,7 @@ unsigned float_i2f(int x) {
 	//That value will be copied and shiften into mantissa, as we need it on the side
 	//for rounding.
 	x &= ~int_min;
-	mantissa = x >> 9;
+	mantissa = x >> 8;
 	printf("X: %s\n", bytestr(x));
 	printf("Mantissa: %s\n", bytestr(mantissa));
 
