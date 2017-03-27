@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 0
+#if 1
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -471,7 +471,58 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-	return 2;
+	const unsigned int_min = 1<<31;
+	unsigned mantissa = 0;
+	unsigned exponent = 158;
+	unsigned sign = int_min & x;
+
+	printf("\n");
+	printf("Processing %s\n", bytestr(x));
+	if (sign)
+	{
+		x = -x;
+		printf("Adjusting sign to %s\n", bytestr(x));
+	}
+	while (!(x & int_min))
+	{
+		exponent--;
+		x <<= 1;
+	}
+	printf("Got exponent %d\n", exponent);
+
+	//Right now, x should have the mantissa in it, with a leading 1 to be killed off.
+	//That value will be copied and shiften into mantissa, as we need it on the side
+	//for rounding.
+	x &= ~int_min;
+	mantissa = x >> 23;
+	printf("X: %s\n", bytestr(x));
+	printf("Mantissa: %s\n", bytestr(mantissa));
+
+	//We need to know if the least significant bit AND the next bit are set, as the last
+	//8 bits are going to be cut off; if they are set
+	//add one to the mantissa and x(rounding). If that causes x's MSB to be set again, 
+	//right shift mantissa by one and add 1 to the exponent.
+	if ((0x80 | (1<<8)) & x)
+	{
+		mantissa++;
+		x++;
+		printf("Proper bits set, rounding!\n");
+		printf("X: %s\n", bytestr(x));
+		printf("Mantissa: %s\n", bytestr(mantissa));
+		if (int_min & x)
+		{
+			printf("Rightshifting mantissa, increasing exponent\n");
+			mantissa >>= 1;
+			printf("X: %s\n", bytestr(x));
+			printf("Mantissa: %s\n", bytestr(mantissa));
+			exponent++;
+		}
+	}
+
+	//Now compose the final floating point number
+	unsigned ret = sign | (exponent << 23) | mantissa;
+	printf("Final value: %s\n", bytestr(ret));
+	return ret;
 }
 
 /* 
