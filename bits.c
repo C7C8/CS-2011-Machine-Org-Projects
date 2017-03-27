@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 1
+#if 0
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -526,11 +526,10 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-	static unsigned count = 0;
 	const int int_min = 1<<31;
-	unsigned ret = 0;
 	unsigned exp = 0;
 
+	//Special cases: 0*2=0, int_min*2=int_min
 	if (uf == 0)
 		return uf;
 	if (uf == int_min)
@@ -539,14 +538,12 @@ unsigned float_twice(unsigned uf) {
 	//get exponent bits only, ignore the sign bit
 	exp = ((int_min>>8) & ~int_min) & uf;
 	if ((exp>>23) == 0xFF)
-		return uf; //check for infinity or NaN
+		return uf; //check for NaN or infinity - defined by exp of 0xFF with mantissa bits set or not, respectively
 
+	//If the value is normalized, just add 1 to the exponent. If it's denormalized, left shift the whole thing and
+	//preserve the sign bit.
 	if (exp)
-		ret = uf + (1<<23); //adding 1 to the exponent of a normalized number doubles it
+		return uf + (1<<23); 
 	else
-	{
-		ret = uf << 1;
-		ret |= (uf & int_min);
-	}
-	return ret;
+		return (uf << 1) | (uf & int_min);
 }
