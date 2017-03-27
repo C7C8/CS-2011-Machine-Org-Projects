@@ -224,7 +224,7 @@ int conditional(int x, int y, int z) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-	//Form a mask by OR'ing the number with itself rightshifted. This results in a number 000...111
+	//Form a mask by OR'ing the number with itself, rightshifted. This results in a number 000...111
 	//((r+1)>>1 in the final line clears the preceeding bits, AND'ing that with 1<<31 clears the sign
 	//bit, and OR'ing the whole thing with x & (1<<31) accounts for the special case where x=INT_MIN.
 	int r = x;
@@ -251,7 +251,7 @@ int divpwr2(int x, int n) {
 	//in the form of 1<<n, forcing rounding to happen upwards rather than downwards
 	//instead. A simple masking procedure -- basically imported from conditional() --
 	//is used to determine which computed value should be returned. Adding (1<<31)>>31 
-	//is just a hack for subtracting 1 - it's adding negative 1, but dlc won't let me
+	//is just a hack for subtracting 1 -- it's adding negative 1, but dlc won't let me
 	//do that directly...
 	int positive = x >> n;
 	int negative = (x + (1 << n) + ((1 << 31) >> 31)) >> n;
@@ -267,6 +267,7 @@ int divpwr2(int x, int n) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
+	//Return the logical inverse of the sign bit, instead of the bitwise inverse.
 	return !((1<<31) & x);
 }
 
@@ -326,7 +327,8 @@ int isLess(int x, int y) {
  */
 int isAsciiDigit(int x) {
 	//Returns (x <= 0x39) && (x >= 0x30). Comparison is done by checking the sign
-	//on x - K where K is the relavent ASCII constant.
+	//on x-K where K is the relavent ASCII constant. One of the boundaries is tweaked
+	//a bit to yield the <= behavior desired.
 	const int int_min = 1 << 31;
 	int lt = !!((x + (~0x39)) & int_min); 
 	int gt = !((x + (~0x30 + 1)) & int_min); 
@@ -345,12 +347,15 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	const int int_min = 1<<31; //the funny thing about banning constants longer than 8 bits is that the compiler will optimize this out and into a 32-bit constant anyways...
+	//the funny thing about banning constants longer than 8 bits is that the 
+	//compiler will optimize this out and into a 32-bit constant anyways...
+	const int int_min = 1<<31; 
 	const int sign = int_min & x;
 	int lastBits = x & 3;
 
 	//Not divisible by 4 and is negative? Checks if the number is negative, if it's not divisible by four,
-	//and if one of the last two bits is set. If so, d4N holds a 1 that will be added onto the final result.
+	//and if one of the last two bits is set. If so, d4N holds a 1 that will be added onto the final result,
+	//as part of rounding.
 	int d4N = (sign >> 31) & !!((x & 7) ^ 4) & !!lastBits;
 	
 	//Perform division on x and multiplication on lastBits;
@@ -361,6 +366,7 @@ int trueThreeFourths(int x)
 	x += x + x;
 	lastBits >>= 2;
 
+	//Add the result of the 3/4 multiplication of lastBits and any rounding needed.
 	x += lastBits + d4N;
 	return x;
 }
@@ -396,20 +402,20 @@ int ilog2(int x) {
 
 	//Figure out the byte that the only set bit is stored in, return the offset in bits for that byte.
 	bitOffset = (((!!(byte0 & gbp)<<31)>>31) & 0) |
-			   (((!!(byte1 & gbp)<<31)>>31) & 8) |
-			   (((!!(byte2 & gbp)<<31)>>31) & 16) |
-			   (((!!(byte3 & gbp)<<31)>>31) & 24);
+		    (((!!(byte1 & gbp)<<31)>>31) & 8) |
+		    (((!!(byte2 & gbp)<<31)>>31) & 16) |
+		    (((!!(byte3 & gbp)<<31)>>31) & 24);
 
 	//Now shift the gbp back by the bit offset and find the new index of the set bit
 	gbp >>= bitOffset;
 	bitPos = (((gbp << 24) >> 31) & 7) |
-		     (((gbp << 25) >> 31) & 6) |
-		     (((gbp << 26) >> 31) & 5) |
-		     (((gbp << 27) >> 31) & 4) |
-		     (((gbp << 28) >> 31) & 3) |
-		     (((gbp << 29) >> 31) & 2) |
-		     (((gbp << 30) >> 31) & 1) |
-		     (((gbp << 31) >> 31) & 0);
+		 (((gbp << 25) >> 31) & 6) |
+		 (((gbp << 26) >> 31) & 5) |
+		 (((gbp << 27) >> 31) & 4) |
+		 (((gbp << 28) >> 31) & 3) |
+		 (((gbp << 29) >> 31) & 2) |
+		 (((gbp << 30) >> 31) & 1) |
+		 (((gbp << 31) >> 31) & 0);
 
 	//The final answer is the position of the set bit plus the earlier calculated offset.
 	return bitPos + bitOffset; 
@@ -427,7 +433,7 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-	//Check for NaN (all exponent) bits set, mantissa nonzero) and return
+	//Check for NaN (all exponent bits set, mantissa nonzero) and return
 	//the number if NaN, otherwise just flip the sign bit.
 	const int int_min = 1<<31;
 	const int exp = 0xFF & (uf>>23);
@@ -448,18 +454,20 @@ unsigned float_neg(unsigned uf) {
  */
 unsigned float_i2f(int x) {
 	const unsigned int_min = 1<<31;
+	const unsigned b1 = 1<<8, b2 = 1<<7; //boundary bits, used for determining whether we should round up or not
 	unsigned mantissa = 0;
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
-	const unsigned b1 = 1<<8, b2 = 1<<7; //boundary bits, used for determining whether we should round up or not
 	unsigned b2set = 0;
 
-	if (x == 0) //Special case
+	if (x == 0) //Special case is special
 		return 0;
 
 	if (sign)
 		x = -x; //Two's complement is evil
 
+	//Shift x to the left and decrease exponent -- set at 158 (31+127 at the start) -- until
+	//there's a 1 in index 31
 	while (!(x & int_min))
 	{
 		exponent--;
@@ -474,8 +482,8 @@ unsigned float_i2f(int x) {
 
 	//Calculate rounding information, since the last 8 bits are lost. b1 is the least
 	//significant bit in the mantissa, b2 is the most significant bit of the 8 that are
-	//cut off. This was found by a combination of logic based on the in-class sides and
-	//experimentation.
+	//cut off. The condition used was found by a combination of logic based on the 
+	//in-class sides and experimentation.
 	b2set = x & b2; //Hack to reduce number of operations used
 	if (((x & b1) && b2set ) || (b2set && (x & 0x7F)))
 	{
