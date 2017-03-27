@@ -503,22 +503,22 @@ unsigned float_i2f(int x) {
 
 	//We need to know if the least significant bit AND the next bit are set, as the last
 	//8 bits are going to be cut off; if they are set
-	//add one to the mantissa and x(rounding). If that causes x's MSB to be set again, 
+	//add one to the mantissa and x(rounding). If that causes a mantissa overflow into exp's range,
 	//right shift mantissa by one and add 1 to the exponent.
-	if ((0x80 | (1<<8)) & x)
+	if ((x & 0xFF) > 0 && (x & (1<<8)))
 	{
 		mantissa++;
-		x++;
 		printf("Proper bits set, rounding!\n");
 		printf("X: %s\n", bytestr(x));
 		printf("Mantissa: %s\n", bytestr(mantissa));
-		if (int_min & x)
+		if (mantissa & (1<<23))
 		{
 			printf("Rightshifting mantissa, increasing exponent\n");
-			mantissa >>= 1;
+			exponent++;
+			mantissa = 0;
 			printf("X: %s\n", bytestr(x));
 			printf("Mantissa: %s\n", bytestr(mantissa));
-			exponent++;
+			printf("Got exponent %d\n", exponent);
 		}
 	}
 
