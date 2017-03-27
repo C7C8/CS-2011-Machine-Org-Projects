@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 0
+#if 1
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -306,8 +306,7 @@ int satMul2(int x) {
 	int res = x << 1;
 	int ressign = (res >> 31) ^ (x >> 31);
 	int saturated = (sign & int_min) | (~sign & int_max);
-	res = (~ressign & res) | (ressign & saturated);
-	return res;
+	return (~ressign & res) | (ressign & saturated);
 }
 
 /* 
@@ -355,13 +354,17 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	//Setup
-//	printf("\n");
+	//x = -5;
 	const int int_min = 1<<31; //the funny thing about banning constants longer than 8 bits is that the compiler will optimize this out and into a 32-bit constant anyways...
 	const int sign = int_min & x;
 	int lastBits = x & 3;
+	int d4N = !!sign & !!((x & 7) ^ 4) & !!lastBits;
+	static int count = 0;
 	
 
+//	printf("\n\nProcessing %d, %d:%s\n", ++count, x, bytestr(x));
+//	printf("!!sign: %d\n", !!sign);
+//	printf("!!((x & 7) ^ 4): %\d\n", !!((x & 7) ^ 4));
 //	printf("s:\t%s\n", bytestr(sign));
 //	printf("lb0:\t%s\n", bytestr(lastBits));
 //	printf("x0:\t%s\n", bytestr(x));
@@ -379,7 +382,7 @@ int trueThreeFourths(int x)
 //	printf("x-mul:\t%s\n", bytestr(x));
 
 	//Add the results together
-	x += lastBits;
+	x += lastBits + d4N;
 //	printf("x-add:\t%s\n", bytestr(x));
 	return x;
 }
