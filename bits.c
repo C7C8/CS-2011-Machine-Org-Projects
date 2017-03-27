@@ -508,7 +508,7 @@ unsigned float_i2f(int x) {
 	//add one to the mantissa and x(rounding). If that causes a mantissa overflow into exp's range,
 	//zero out mantissa and increase exp by one.
 	if (((x & 0xFF) > 0 && (x & (1<<8))) ||
-			((x & 0x80)) && (x & 0x7F))
+			((x & 0x80)) && (x & 0x7F) && !(x & (1<<8)))
 	{
 		mantissa++;
 		printf("Proper bits set, rounding!\n");
