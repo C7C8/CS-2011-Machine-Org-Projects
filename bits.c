@@ -477,58 +477,47 @@ unsigned float_i2f(int x) {
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
 	unsigned ret = 0;
+	unsigned b1 = 1<<8, b2 = 1<<7, b3 = 1<<6; //boundary bits, used for determining whether we should round up or not
 
 	if (x == 0)
 		return 0;
 
-	printf("\n");
-	printf("Processing test %d, %s\n", ++count, bytestr(x));
 	if (sign)
 	{
 		x = -x;
-		printf("Adjusting sign to %s\n", bytestr(x));
 	}
 	while (!(x & int_min))
 	{
 		exponent--;
 		x <<= 1;
 	}
-	printf("Got exponent %d\n", exponent);
 
 	//Right now, x should have the mantissa in it, with a leading 1 to be killed off.
 	//That value will be copied and shiften into mantissa, as we need it on the side
 	//for rounding.
 	x &= ~int_min;
 	mantissa = x >> 8;
-	printf("X: %s\n", bytestr(x));
-	printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
 
 	//We need to know if the least significant bit AND the next bit are set, as the last
 	//8 bits are going to be cut off; if they are set
 	//add one to the mantissa and x(rounding). If that causes a mantissa overflow into exp's range,
 	//zero out mantissa and increase exp by one.
-	if (((x & 0xFF) > 0 && (x & (1<<8))) ||
-			((x & 0x80)) && (x & 0x7F) && !(x & (1<<8)))
+	if (((x & b1) && (x & b2) && ((x & b2) || (x & b3))) || ((x & b2) && (x & 0x7F)))
 	{
 		mantissa++;
-		printf("Proper bits set, rounding!\n");
-		printf("X: %s\n", bytestr(x));
-		printf("Mantissa: %s\n", bytestr(mantissa));
 		if (mantissa & (1<<23))
 		{
 			printf("Rightshifting mantissa, increasing exponent\n");
 			exponent++;
 			mantissa = 0;
-			printf("X: %s\n", bytestr(x));
-			printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
-			printf("Got exponent %d\n", exponent);
+//			printf("X: %s\n", bytestr(x));
+//			printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
+//			printf("Got exponent %d\n", exponent);
 		}
 	}
 
 	//Now compose the final floating point number
-	ret = sign | (exponent << 23) | mantissa;
-	printf("Final value: %s\n\n", bytestr(ret));
-	return ret;
+	return sign | (exponent << 23) | mantissa;
 }
 
 /* 
