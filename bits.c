@@ -171,15 +171,6 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 1
-char* bytestr(int byte) {
-	char *str = malloc(32); //hey look, a memory leak!
-	for (char i = 0; i < 32; i++)
-		str[31 - i] = (1 << i) & byte ? '1' : '0';
-	return str;
-}
-#endif
-
 int oddBits(void) {
 	//Must OR together a lot of smaller constants because constants bigger than 8 bits are forbidden
 	return 0xAA | (0xAA << 8) | (0xAA << 16) | (0xAA << 24);
@@ -354,36 +345,23 @@ int isAsciiDigit(int x) {
  */
 int trueThreeFourths(int x)
 {
-	//x = -5;
 	const int int_min = 1<<31; //the funny thing about banning constants longer than 8 bits is that the compiler will optimize this out and into a 32-bit constant anyways...
 	const int sign = int_min & x;
 	int lastBits = x & 3;
-	int d4N = !!sign & !!((x & 7) ^ 4) & !!lastBits;
-	static int count = 0;
-	
 
-//	printf("\n\nProcessing %d, %d:%s\n", ++count, x, bytestr(x));
-//	printf("!!sign: %d\n", !!sign);
-//	printf("!!((x & 7) ^ 4): %\d\n", !!((x & 7) ^ 4));
-//	printf("s:\t%s\n", bytestr(sign));
-//	printf("lb0:\t%s\n", bytestr(lastBits));
-//	printf("x0:\t%s\n", bytestr(x));
+	//Not divisible by 4 and is negative? Checks if the number is negative, if it's not divisible by four,
+	//and if one of the last two bits is set. If so, d4N holds a 1 that will be added onto the final result.
+	int d4N = !!sign & !!((x & 7) ^ 4) & !!lastBits;
 	
 	//Perform division on x and multiplication on lastBits;
 	x >>= 2;
 	lastBits += lastBits + lastBits;
-//	printf("lb-mul:\t%s\n", bytestr(lastBits));
-//	printf("x-div:\t%s\n", bytestr(x));
 
 	//Perform multiplication on x and division on lastBits
 	x += x + x;
 	lastBits >>= 2;
-//	printf("lb-div:\t%s\n", bytestr(lastBits));
-//	printf("x-mul:\t%s\n", bytestr(x));
 
-	//Add the results together
 	x += lastBits + d4N;
-//	printf("x-add:\t%s\n", bytestr(x));
 	return x;
 }
 
