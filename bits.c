@@ -476,6 +476,7 @@ unsigned float_i2f(int x) {
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
 	const unsigned b1 = 1<<8, b2 = 1<<7, b3 = 1<<6; //boundary bits, used for determining whether we should round up or not
+	unsigned b2set = 0;
 
 	if (x == 0) //Special case
 		return 0;
@@ -500,7 +501,8 @@ unsigned float_i2f(int x) {
 	//cut off, and b3 is the one immediately after that. The last test at the end was
 	//determined by experimentation, it makes sure that the seven least significant bits
 	//in the cut off 8 have a set bit in there somewhere.
-	if (((x & b1) && (x & b2) && ((x & b2) || (x & b3))) || ((x & b2) && (x & 0x7F)))
+	b2set = x & b2; //Hack to reduce number of operations used
+	if (((x & b1) && b2set  && (b2set || (x & b3))) || (b2set && (x & 0x7F)))
 	{
 		mantissa++;
 		if (mantissa & (1<<23))
