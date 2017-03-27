@@ -529,12 +529,31 @@ unsigned float_twice(unsigned uf) {
 	static unsigned count = 0;
 	const unsigned int_min = 1<<31;
 	unsigned ret = 0;
+	unsigned exp = 0;
+
+
 	printf("\nProcessing %d,\t%s\n", count++, bytestr(count));
 	if (uf == 0)
 		return uf;
 	if (uf == int_min)
 		return uf;
-	ret = uf + (1<<23);
+
+	//get exponent bits only, ignore the sign bit
+	exp = ((int_min>>8) & ~int_min) & uf;
+	bytestr("Extracted exponent of %s\n", bytestr(exp));
+
+	if (exp)
+		ret = uf + (1<<23); //adding 1 to the exponent of a normalized number doubles it
+	else
+	{
+		printf("Denormalized value detected\n");
+		//The whole number should get left shifted, but we need to keep the sign bit in place
+		//(whatever it might be...)
+		ret = uf << 1;
+		ret |= (uf & int_min);
+	}
+
+
 	printf("Final return:\t%s\n\n", bytestr(ret));
 	return ret;
 }
