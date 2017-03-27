@@ -392,11 +392,20 @@ int trueThreeFourths(int x)
  *   Rating: 4
  */
 int ilog2(int x) {
-	//Calculate the greatest bit position using the solution from the related function,
-	//then use that bit to form a mask. Then... brute force
 	int r = x;
 	const int int_min = 1<<31;
 	int gbp;
+	int bitOffset = 0;
+	int bitPos = 0;
+
+	//Masks so we can figure out which byte in gbp has a 1-bit in it
+	const int byte0 = 0xFF;
+	const int byte1 = 0xFF<<8;
+	const int byte2 = byte1<<8;
+	const int byte3 = byte2<<8;
+
+	//Do greatestBitPos on X to find the position of the most significant bit.
+	//Discards all the other bits because this algorithm should round down.
 	r |= r >> 1;
 	r |= r >> 2;
 	r |= r >> 4;
@@ -404,39 +413,25 @@ int ilog2(int x) {
 	r |= r >> 16;
 	gbp = (((r + 1) >> 1) & ~int_min) | (x & int_min);
 
-	//Please hit me as hard as you can.
-	return (((gbp << 0) >> 31) & 31) |
-	       (((gbp << 1) >> 31) & 30) |
-	       (((gbp << 2) >> 31) & 29) |
-	       (((gbp << 3) >> 31) & 28) |
-	       (((gbp << 4) >> 31) & 27) |
-	       (((gbp << 5) >> 31) & 26) |
-	       (((gbp << 6) >> 31) & 25) |
-	       (((gbp << 7) >> 31) & 24) |
-	       (((gbp << 8) >> 31) & 23) |
-	       (((gbp << 9) >> 31) & 22) |
-	       (((gbp << 10) >> 31) & 21) |
-	       (((gbp << 11) >> 31) & 20) |
-	       (((gbp << 12) >> 31) & 19) |
-	       (((gbp << 13) >> 31) & 18) |
-	       (((gbp << 14) >> 31) & 17) |
-	       (((gbp << 15) >> 31) & 16) |
-	       (((gbp << 16) >> 31) & 15) |
-	       (((gbp << 17) >> 31) & 14) |
-	       (((gbp << 18) >> 31) & 13) |
-	       (((gbp << 19) >> 31) & 12) |
-	       (((gbp << 20) >> 31) & 11) |
-	       (((gbp << 21) >> 31) & 10) |
-	       (((gbp << 22) >> 31) & 9) |
-	       (((gbp << 23) >> 31) & 8) |
-	       (((gbp << 24) >> 31) & 7) |
-	       (((gbp << 25) >> 31) & 6) |
-	       (((gbp << 26) >> 31) & 5) |
-	       (((gbp << 27) >> 31) & 4) |
-	       (((gbp << 28) >> 31) & 3) |
-	       (((gbp << 29) >> 31) & 2) |
-	       (((gbp << 30) >> 31) & 1) |
-	       (((gbp << 31) >> 31) & 0);
+	//Figure out the byte that the only set bit is stored in, return the offset in bits for that byte.
+	bitOffset = (((!!(byte0 & gbp)<<31)>>31) & 0) |
+			   (((!!(byte1 & gbp)<<31)>>31) & 8) |
+			   (((!!(byte2 & gbp)<<31)>>31) & 16) |
+			   (((!!(byte3 & gbp)<<31)>>31) & 24);
+
+	//Now shift the gbp back by the bit offset and find the new index of the set bit
+	gbp >>= bitOffset;
+	bitPos = (((gbp << 24) >> 31) & 7) |
+		     (((gbp << 25) >> 31) & 6) |
+		     (((gbp << 26) >> 31) & 5) |
+		     (((gbp << 27) >> 31) & 4) |
+		     (((gbp << 28) >> 31) & 3) |
+		     (((gbp << 29) >> 31) & 2) |
+		     (((gbp << 30) >> 31) & 1) |
+		     (((gbp << 31) >> 31) & 0);
+
+	//The final answer is the position of the set bit plus the earlier calculated offset.
+	return bitPos + bitOffset; 
 }
 
 /* 
