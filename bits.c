@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 0
+#if 1
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -526,10 +526,15 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
+	static unsigned count = 0;
 	const unsigned int_min = 1<<31;
+	unsigned ret = 0;
+	printf("\nProcessing %d,\t%s\n", count++, bytestr(count));
 	if (uf == 0)
 		return uf;
 	if (uf == int_min)
 		return uf;
-	return uf + 1<<23;
+	ret = uf + (1<<23);
+	printf("Final return:\t%s\n\n", bytestr(ret));
+	return ret;
 }
