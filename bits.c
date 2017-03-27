@@ -476,6 +476,7 @@ unsigned float_i2f(int x) {
 	unsigned mantissa = 0;
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
+	unsigned ret = 0;
 
 	if (x == 0)
 		return 0;
@@ -505,8 +506,9 @@ unsigned float_i2f(int x) {
 	//We need to know if the least significant bit AND the next bit are set, as the last
 	//8 bits are going to be cut off; if they are set
 	//add one to the mantissa and x(rounding). If that causes a mantissa overflow into exp's range,
-	//right shift mantissa by one and add 1 to the exponent.
-	if ((x & 0xFF) > 0 && (x & (1<<8)))
+	//zero out mantissa and increase exp by one.
+	if (((x & 0xFF) > 0 && (x & (1<<8))) ||
+			((x & 0x80)) && (x & 0x7F))
 	{
 		mantissa++;
 		printf("Proper bits set, rounding!\n");
@@ -524,7 +526,7 @@ unsigned float_i2f(int x) {
 	}
 
 	//Now compose the final floating point number
-	unsigned ret = sign | (exponent << 23) | mantissa;
+	ret = sign | (exponent << 23) | mantissa;
 	printf("Final value: %s\n\n", bytestr(ret));
 	return ret;
 }
@@ -541,5 +543,12 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-	return 2;
+	static int count = 0;
+	const unsigned int_min = 1<<31;
+	//printf("\n\nProcessing %d, %s\n", count++, bytestr(uf));
+	if (uf == 0)
+		return uf;
+	if (uf == int_min)
+		return uf;
+	return uf + 1<<23;
 }
