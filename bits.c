@@ -476,6 +476,9 @@ unsigned float_i2f(int x) {
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
 
+	if (x == 0)
+		return 0;
+
 	printf("\n");
 	printf("Processing %s\n", bytestr(x));
 	if (sign)
@@ -494,7 +497,7 @@ unsigned float_i2f(int x) {
 	//That value will be copied and shiften into mantissa, as we need it on the side
 	//for rounding.
 	x &= ~int_min;
-	mantissa = x >> 23;
+	mantissa = x >> 9;
 	printf("X: %s\n", bytestr(x));
 	printf("Mantissa: %s\n", bytestr(mantissa));
 
@@ -521,7 +524,7 @@ unsigned float_i2f(int x) {
 
 	//Now compose the final floating point number
 	unsigned ret = sign | (exponent << 23) | mantissa;
-	printf("Final value: %s\n", bytestr(ret));
+	printf("Final value: %s\n\n", bytestr(ret));
 	return ret;
 }
 
