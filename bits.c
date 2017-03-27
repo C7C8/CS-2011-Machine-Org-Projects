@@ -502,7 +502,7 @@ unsigned float_i2f(int x) {
 	//determined by experimentation, it makes sure that the seven least significant bits
 	//in the cut off 8 have a set bit in there somewhere.
 	b2set = x & b2; //Hack to reduce number of operations used
-	if (((x & b1) && b2set  && (b2set || (x & b3))) || (b2set && (x & 0x7F)))
+	if (((x & b1) && b2set ) || (b2set && (x & 0x7F)))
 	{
 		mantissa++;
 		if (mantissa & (1<<23))
