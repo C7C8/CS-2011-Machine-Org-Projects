@@ -171,7 +171,7 @@ NOTES:
  *   Max ops: 8
  *   Rating: 2
  */
-#if 1
+#if 0
 char* bytestr(int byte) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
@@ -471,21 +471,18 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-	static int count = 0;
 	const unsigned int_min = 1<<31;
 	unsigned mantissa = 0;
 	unsigned exponent = 158;
 	unsigned sign = int_min & x;
-	unsigned ret = 0;
-	unsigned b1 = 1<<8, b2 = 1<<7, b3 = 1<<6; //boundary bits, used for determining whether we should round up or not
+	const unsigned b1 = 1<<8, b2 = 1<<7, b3 = 1<<6; //boundary bits, used for determining whether we should round up or not
 
-	if (x == 0)
+	if (x == 0) //Special case
 		return 0;
 
 	if (sign)
-	{
-		x = -x;
-	}
+		x = -x; //Two's complement is evil
+
 	while (!(x & int_min))
 	{
 		exponent--;
@@ -493,26 +490,23 @@ unsigned float_i2f(int x) {
 	}
 
 	//Right now, x should have the mantissa in it, with a leading 1 to be killed off.
-	//That value will be copied and shiften into mantissa, as we need it on the side
+	//That value will be copied and shifted into mantissa, as we need it on the side
 	//for rounding.
 	x &= ~int_min;
 	mantissa = x >> 8;
 
-	//We need to know if the least significant bit AND the next bit are set, as the last
-	//8 bits are going to be cut off; if they are set
-	//add one to the mantissa and x(rounding). If that causes a mantissa overflow into exp's range,
-	//zero out mantissa and increase exp by one.
+	//Calculate rounding information, since the last 8 bits are lost. b1 is the least
+	//significant bit in the mantissa, b2 is the most significant bit of the 8 that are
+	//cut off, and b3 is the one immediately after that. The last test at the end was
+	//determined by experimentation, it makes sure that the seven least significant bits
+	//in the cut off 8 have a set bit in there somewhere.
 	if (((x & b1) && (x & b2) && ((x & b2) || (x & b3))) || ((x & b2) && (x & 0x7F)))
 	{
 		mantissa++;
 		if (mantissa & (1<<23))
 		{
-			printf("Rightshifting mantissa, increasing exponent\n");
 			exponent++;
 			mantissa = 0;
-//			printf("X: %s\n", bytestr(x));
-//			printf("Mantissa: %d:%s\n", mantissa, bytestr(mantissa));
-//			printf("Got exponent %d\n", exponent);
 		}
 	}
 
@@ -532,9 +526,7 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-	static int count = 0;
 	const unsigned int_min = 1<<31;
-	//printf("\n\nProcessing %d, %s\n", count++, bytestr(uf));
 	if (uf == 0)
 		return uf;
 	if (uf == int_min)
