@@ -530,10 +530,8 @@ unsigned float_twice(unsigned uf) {
 	const int int_min = 1<<31;
 	unsigned exp = 0;
 
-	//Special cases: 0*2=0, int_min*2=int_min
+	//Special case: 0*2=0
 	if (uf == 0)
-		return uf;
-	if (uf == int_min)
 		return uf;
 
 	//get exponent bits only, ignore the sign bit
