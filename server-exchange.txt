@@ -6,3 +6,8 @@ MIME-Version: 1.0
 Content-Type: text/plain
 
 OK
+
+
+====================
+
+HTTP/1.0 200 OK\r\nConnection: close\r\nMIME-Version: 1.0\r\nContent-Type: text/plain\r\n\r\nOK
