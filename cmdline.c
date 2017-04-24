@@ -31,7 +31,7 @@ const char *gengetopt_args_info_usage = "Usage: csim [-hv] -s <s> -E <E> -b <b> 
 
 const char *gengetopt_args_info_versiontext = "Created by crmyers for d17-cs2011 at WPI";
 
-const char *gengetopt_args_info_description = "Simulate a cache using s set index bits, E lines per set, b block bits, and a\ntracefile as input.";
+const char *gengetopt_args_info_description = "Simulate a cache using s set index bits, E lines per set, b block bits, and a\ntracefile as input. If\nno tracefile is specified, stdin is used as an input.";
 
 const char *gengetopt_args_info_detailed_help[] = {
   "  -h, --help                Print help and exit",
@@ -396,12 +396,6 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   if (! args_info->block_bits_given)
     {
       fprintf (stderr, "%s: '--block-bits' ('-b') option required%s\n", prog_name, (additional_error ? additional_error : ""));
-      error_occurred = 1;
-    }
-  
-  if (! args_info->tracefile_given)
-    {
-      fprintf (stderr, "%s: '--tracefile' ('-t') option required%s\n", prog_name, (additional_error ? additional_error : ""));
       error_occurred = 1;
     }
   
