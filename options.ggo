@@ -6,7 +6,7 @@ description "Simulate a cache using s set index bits, E lines per set, b block b
 versiontext "Created by crmyers for d17-cs2011 at WPI"
 
 option "verbose" v "Print trace info"
-	argoptional
+	optional
 
 option "set-index-bits" s "Number of set index bits"
 	details="Set the number of set index bits, where the number of sets is 2^s"

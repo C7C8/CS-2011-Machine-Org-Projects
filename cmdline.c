@@ -381,12 +381,6 @@ cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *pro
   FIX_UNUSED (additional_error);
 
   /* checks for required options */
-  if (! args_info->verbose_given)
-    {
-      fprintf (stderr, "%s: '--verbose' ('-v') option required%s\n", prog_name, (additional_error ? additional_error : ""));
-      error_occurred = 1;
-    }
-  
   if (! args_info->set_index_bits_given)
     {
       fprintf (stderr, "%s: '--set-index-bits' ('-s') option required%s\n", prog_name, (additional_error ? additional_error : ""));
@@ -578,7 +572,7 @@ cmdline_parser_internal (
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVv:s:E:b:t:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVvs:E:b:t:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
