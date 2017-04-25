@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
@@ -16,7 +15,6 @@ const size_t INPUT_BUF_SIZE = 1024;
  */
 struct cacheLine {
 	uint64_t tag;
-	uint64_t setIndex;
 	struct cacheLine* next;
 	struct cacheLine* prev;
 };
@@ -28,7 +26,7 @@ typedef struct {
 } CacheSet;
 
 //Store a line in the cache. Returns non-zero if an eviction was made, else returns 0.
-int storeLine(uint64_t addr, CacheSet* set);
+int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_MASK);
 
 int main(int argc, char** argv)
 {
@@ -107,7 +105,7 @@ int main(int argc, char** argv)
 				if (args.verbose_given)
 					printf("miss");
 				cacheMisses++;
-				if (storeLine(addr, selectedSet)){
+				if (storeLine(addr, selectedSet, args.associativity_arg, TAG_MASK)){
 					cacheEvictions++;
 					if (args.verbose_given)
 						printf(", eviction");
@@ -119,7 +117,8 @@ int main(int argc, char** argv)
 				}
 				break;
 			}
-			if (cur->tag == addr | TAG_MASK){
+			if (cur->tag == (addr | TAG_MASK)){
+				//TODO: Move current to the beginning of the cache set's linked list
 				cacheHits++;
 				if (args.verbose_given)
 					printf("hit");
@@ -142,4 +141,38 @@ char* bytestr(uint64_t num) {
 	for (char i = 0; i < 32; i++)
 		str[31 - i] = (char)((1<<i) & num ? '1' : '0');
 	return str;
+}
+
+int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_MASK){
+	//Check the number of lines stored in the set; if equal to ASSOC, we need to evict. In the happy case where there
+	//are no evictions, just append to the end of the list.
+	CacheLine* newLine = (CacheLine*)malloc(sizeof(CacheLine));
+	newLine->tag = addr | TAG_MASK;
+	CacheLine* last = set->cacheLines;
+	for (CacheLine* cur = set->cacheLines; cur != NULL; cur = cur->next){
+		if (cur->next == NULL) {
+			last = cur;
+			break;
+		}
+	}
+
+	if (set->size >= ASSOC){
+		if (last == NULL) //that was easy
+			set->cacheLines = newLine;
+		else {
+			last->next = newLine;
+			newLine->prev = last;
+		}
+		set->size++;
+		return 0;
+	}
+	else {
+		//Serve eviction notice and change out the locks
+		last->prev->next = NULL;
+		free(last);
+		newLine->next = set->cacheLines;
+		set->cacheLines->prev = newLine;
+		set->cacheLines = newLine;
+		return 1;
+	}
 }
