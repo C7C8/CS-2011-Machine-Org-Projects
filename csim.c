@@ -6,7 +6,7 @@
 #include <time.h>
 #include "cachelab.h"
 #include "cmdline.h"
-char* bytestr(unsigned int num);
+char* bytestr(uint64_t num);
 const size_t INPUT_BUF_SIZE = 1024;
 
 /**
@@ -48,9 +48,9 @@ int main(int argc, char** argv)
 	int cacheHits = 0, cacheMisses = 1, cacheEvictions = 2;
 	const int CACHE_SETS = 1 << args.set_index_bits_arg;
 	//const int TAG_BITS = 64 - args.block_bits_arg - args.set_index_bits_arg; //Assume 64-bit addresses
-	const unsigned int BLOCK_MASK = (const unsigned int)(1 << args.block_bits_arg) - 1;
-	const unsigned int SET_MASK = ((1 << (args.set_index_bits_arg + args.block_bits_arg )) - 1) ^ BLOCK_MASK;
-	const unsigned int TAG_MASK = ~(BLOCK_MASK | SET_MASK);
+	const uint64_t BLOCK_MASK = (const unsigned int)(1 << args.block_bits_arg) - 1;
+	const uint64_t SET_MASK = ((1 << (args.set_index_bits_arg + args.block_bits_arg )) - 1) ^ BLOCK_MASK;
+	const uint64_t TAG_MASK = ~(BLOCK_MASK | SET_MASK);
 	char* inputBuf = (char*)malloc(INPUT_BUF_SIZE);
 	srand((unsigned int)time(0));
 
@@ -83,16 +83,16 @@ int main(int argc, char** argv)
 			continue;
 
 		char operator;
-		int addr, size;
-		sscanf(inputBuf, " %c %x,%d", &operator, &addr, &size);
+		uint64_t addr, size;
+		sscanf(inputBuf, " %c %lux,%lu", &operator, &addr, &size);
 
 		//First step: Figure out what set we're supposed to be looking at. The set bits are in between the tag bits and
 		//the block offset bits, so we need to form a mask out of them.
-		unsigned int selectedSet = (addr & SET_MASK) >> args.block_bits_arg;
+		uint64_t selectedSet = (addr & SET_MASK) >> args.block_bits_arg;
 
 		if (args.verbose_given){
-			printf("Processing address:\t%s\n", bytestr((unsigned int)addr));
-			printf("Obtained set number:\t%d:%s\n", selectedSet, bytestr(addr & SET_MASK));
+			printf("Processing address:\t\t\t%s\n", bytestr((unsigned int)addr));
+			printf("Obtained set number:\t%lu:\t%s\n", selectedSet, bytestr(addr & SET_MASK));
 		}
 	}
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-char* bytestr(unsigned int num) {
+char* bytestr(uint64_t num) {
 	char *str = malloc(32); //hey look, a memory leak!
 	for (char i = 0; i < 32; i++)
 		str[31 - i] = (char)((1<<i) & num ? '1' : '0');
