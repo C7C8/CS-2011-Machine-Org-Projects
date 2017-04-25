@@ -82,9 +82,9 @@ int main(int argc, char** argv)
 		if (inputBuf[0] == 'I')
 			continue;
 
-		char operator;
-		uint64_t addr, size;
-		sscanf(inputBuf, " %c %lux,%lu", &operator, &addr, &size);
+		char operator = 'L';
+		uint64_t addr = 0, size = 0;
+		sscanf(inputBuf, " %c %lx,%lu", &operator, &addr, &size);
 
 		//First step: Figure out what set we're supposed to be looking at. The set bits are in between the tag bits and
 		//the block offset bits, so we need to form a mask out of them.
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 		}
 
 		//Cache set grabbed, now search through its cache lines to find a matching tag (if one exists).
-		printf("%c %lux: ", operator, addr);
+		printf("%c %lX: ", operator, addr);
 		for (CacheLine* cur = selectedSet->cacheLines;; cur = cur->next){
 			if (cur == NULL){
 				//Store a line in the cache, incrementing the eviction count if needed. If the op was a modify call,
