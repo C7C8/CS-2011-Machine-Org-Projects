@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 	}
 
 	//Now that the setup work is all done, let's do some some cache simulation work!
-	int cacheHits = 0, cacheMisses = 1, cacheEvictions = 2;
+	int cacheHits = 0, cacheMisses = 0, cacheEvictions = 0;
 	const int CACHE_SETS = 1 << args.set_index_bits_arg;
 	//const int TAG_BITS = 64 - args.block_bits_arg - args.set_index_bits_arg;
 	const uint64_t BLOCK_MASK = (const unsigned int)(1 << args.block_bits_arg) - 1;
