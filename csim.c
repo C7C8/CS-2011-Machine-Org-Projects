@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 				}
 				break;
 			}
-			if (cur->tag == (addr | TAG_MASK)){
+			if (cur->tag == (addr & TAG_MASK)){
 				cacheHits++;
 
 				//Move current up in life
@@ -156,7 +156,7 @@ int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_
 	//Check the number of lines stored in the set; if equal to ASSOC, we need to evict. In the happy case where there
 	//are no evictions, just append to the end of the list.
 	CacheLine* newLine = (CacheLine*)malloc(sizeof(CacheLine));
-	newLine->tag = addr | TAG_MASK;
+	newLine->tag = addr & TAG_MASK;
 	CacheLine* last = set->cacheLines;
 	for (CacheLine* cur = set->cacheLines; cur != NULL; cur = cur->next){
 		if (cur->next == NULL) {
