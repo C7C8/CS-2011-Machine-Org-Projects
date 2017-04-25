@@ -126,7 +126,8 @@ int main(int argc, char** argv)
 				if (cur->prev != NULL)
 					cur->prev->next = cur->next;
 				cur->prev = NULL;
-				cur->next = selectedSet->cacheLines;
+				if (cur != selectedSet->cacheLines)
+					cur->next = selectedSet->cacheLines;
 				selectedSet->cacheLines = cur;
 
 				if (args.verbose_given)
