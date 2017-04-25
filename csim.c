@@ -165,7 +165,7 @@ int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_
 		}
 	}
 
-	if (set->size >= ASSOC){
+	if (set->size < ASSOC){
 		if (last == NULL) //that was easy
 			set->cacheLines = newLine;
 		else {
