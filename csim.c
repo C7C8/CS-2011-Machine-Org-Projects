@@ -118,8 +118,17 @@ int main(int argc, char** argv)
 				break;
 			}
 			if (cur->tag == (addr | TAG_MASK)){
-				//TODO: Move current to the beginning of the cache set's linked list
 				cacheHits++;
+
+				//Move current up in life
+				if (cur->next != NULL)
+					cur->next->prev = cur->prev;
+				if (cur->prev != NULL)
+					cur->prev->next = cur->next;
+				cur->prev = NULL;
+				cur->next = selectedSet->cacheLines;
+				selectedSet->cacheLines = cur;
+
 				if (args.verbose_given)
 					printf("hit");
 				break;
