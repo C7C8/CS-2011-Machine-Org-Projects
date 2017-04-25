@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 {
     struct gengetopt_args_info args;
 	cmdline_parser(argc, argv, &args);
-
+	args.
 	if (args.verbose_given) {
 		printf("Set index bits: %d\n", args.set_index_bits_arg);
 		printf("Associativity: %d\n", args.associativity_arg);
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	//Now that the setup work is all done, let's do some some cache simulation work!
 	int cacheHits = 0, cacheMisses = 1, cacheEvictions = 2;
 	const int CACHE_SETS = 1 << args.set_index_bits_arg;
-	//const int TAG_BITS = 64 - args.block_bits_arg - args.set_index_bits_arg; //Assume 64-bit addresses
+	//const int TAG_BITS = 64 - args.block_bits_arg - args.set_index_bits_arg;
 	const uint64_t BLOCK_MASK = (const unsigned int)(1 << args.block_bits_arg) - 1;
 	const uint64_t SET_MASK = ((1 << (args.set_index_bits_arg + args.block_bits_arg )) - 1) ^ BLOCK_MASK;
 	const uint64_t TAG_MASK = ~(BLOCK_MASK | SET_MASK);
@@ -88,11 +88,12 @@ int main(int argc, char** argv)
 
 		//First step: Figure out what set we're supposed to be looking at. The set bits are in between the tag bits and
 		//the block offset bits, so we need to form a mask out of them.
-		uint64_t selectedSet = (addr & SET_MASK) >> args.block_bits_arg;
+		uint64_t setNum = (addr & SET_MASK) >> args.block_bits_arg;
+		CacheLine* selectedSet = &cache[setNum];
 
 		if (args.verbose_given){
 			printf("Processing address:\t\t\t%s\n", bytestr((unsigned int)addr));
-			printf("Obtained set number:\t%lu:\t%s\n", selectedSet, bytestr(addr & SET_MASK));
+			printf("Obtained set number:\t%lu:\t%s\n", setNum, bytestr(addr & SET_MASK));
 		}
 	}
 
