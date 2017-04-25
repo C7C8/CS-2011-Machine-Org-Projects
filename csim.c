@@ -10,24 +10,30 @@ char* bytestr(uint64_t num);
 const size_t INPUT_BUF_SIZE = 1024;
 
 /**
- * A single cache line. Contains a valid bit, a tag, a set index, and a block offset.
+ * A single line in a CacheLine. Contains a pointer to the next CacheLine in series -- LRU is implemented using a doubly
+ * linked list. The item at the end is the least-recently used cache line. The list can be at most args.associativity_arg
+ * size, anything beyond that and we'll start evicting entries.
  */
-typedef struct {
+struct cacheLine {
 	uint64_t tag;
 	uint64_t setIndex;
-	uint64_t blockOffset;
-	uint8_t valid;
-} CacheLine;
+	struct cacheLine* next;
+	struct cacheLine* prev;
+};
+typedef struct cacheLine CacheLine;
 
 typedef struct {
-	CacheLine* cacheLines; //Wait, what? Why is this a struct holding a single- nevermind, I give up
+	CacheLine* cacheLines;
+	uint16_t size;
 } CacheSet;
+
+//Store a line in the cache. Returns non-zero if an eviction was made, else returns 0.
+int storeLine(uint64_t addr, CacheSet* set);
 
 int main(int argc, char** argv)
 {
     struct gengetopt_args_info args;
 	cmdline_parser(argc, argv, &args);
-	args.
 	if (args.verbose_given) {
 		printf("Set index bits: %d\n", args.set_index_bits_arg);
 		printf("Associativity: %d\n", args.associativity_arg);
@@ -60,10 +66,6 @@ int main(int argc, char** argv)
 			   args.associativity_arg,
 			   CACHE_SETS * args.associativity_arg * (int)sizeof(CacheLine));
 	CacheSet* cache = (CacheSet*)malloc(sizeof(CacheSet) * CACHE_SETS);
-	for (int i = 0; i < CACHE_SETS; i++) {
-		cache[i].cacheLines = (CacheLine *) malloc(sizeof(CacheLine) * args.associativity_arg);
-		memset(cache[i].cacheLines, 0, sizeof(CacheLine) * args.associativity_arg);
-	}
 
 	if (args.verbose_given) {
 		printf("Block mask:\t%s\n", bytestr(BLOCK_MASK));
@@ -89,18 +91,47 @@ int main(int argc, char** argv)
 		//First step: Figure out what set we're supposed to be looking at. The set bits are in between the tag bits and
 		//the block offset bits, so we need to form a mask out of them.
 		uint64_t setNum = (addr & SET_MASK) >> args.block_bits_arg;
-		CacheLine* selectedSet = &cache[setNum];
+		CacheSet* selectedSet = &cache[setNum];
 
 		if (args.verbose_given){
 			printf("Processing address:\t\t\t%s\n", bytestr((unsigned int)addr));
 			printf("Obtained set number:\t%lu:\t%s\n", setNum, bytestr(addr & SET_MASK));
 		}
+
+		//Cache set grabbed, now search through its cache lines to find a matching tag (if one exists).
+		printf("%c %lux: ", operator, addr);
+		for (CacheLine* cur = selectedSet->cacheLines;; cur = cur->next){
+			if (cur == NULL){
+				//Store a line in the cache, incrementing the eviction count if needed. If the op was a modify call,
+				//increase the hit counter by one (modfy = R+W).
+				if (args.verbose_given)
+					printf("miss");
+				cacheMisses++;
+				if (storeLine(addr, selectedSet)){
+					cacheEvictions++;
+					if (args.verbose_given)
+						printf(", eviction");
+				}
+				if (operator == 'M'){
+					cacheHits++;
+					if (args.verbose_given)
+						printf(", hit");
+				}
+				break;
+			}
+			if (cur->tag == addr | TAG_MASK){
+				cacheHits++;
+				if (args.verbose_given)
+					printf("hit");
+				break;
+			}
+		}
+		printf("\n");
 	}
 
 	//Free all memory, print the summary, and shut down
 	free(inputBuf);
-	for (int i = 0; i < CACHE_SETS; i++)
-		free(cache[i].cacheLines);
+	//TODO: Free cache lines!
 	free(cache);
     printSummary(cacheHits, cacheMisses, cacheEvictions);
     return 0;
