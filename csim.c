@@ -91,13 +91,9 @@ int main(int argc, char** argv)
 		uint64_t setNum = (addr & SET_MASK) >> args.block_bits_arg;
 		CacheSet* selectedSet = &cache[setNum];
 
-		if (args.verbose_given){
-			printf("Processing address:\t\t\t%s\n", bytestr((unsigned int)addr));
-			printf("Obtained set number:\t%lu:\t%s\n", setNum, bytestr(addr & SET_MASK));
-		}
-
 		//Cache set grabbed, now search through its cache lines to find a matching tag (if one exists).
-		printf("%c %lX: ", operator, addr);
+		if (args.verbose_given)
+			printf("%c %lX: ", operator, addr);
 		for (CacheLine* cur = selectedSet->cacheLines;; cur = cur->next){
 			if (cur == NULL){
 				//Store a line in the cache, incrementing the eviction count if needed. If the op was a modify call,
@@ -119,6 +115,11 @@ int main(int argc, char** argv)
 			}
 			if (cur->tag == (addr & TAG_MASK)){
 				cacheHits++;
+				if (operator == 'M') {
+					cacheHits++;
+					if (args.verbose_given)
+						printf("hit ");
+				}
 
 				//Move curr up in life, if needed
 				if (cur != selectedSet->cacheLines) {
@@ -137,7 +138,8 @@ int main(int argc, char** argv)
 				break;
 			}
 		}
-		printf("\n");
+		if (args.verbose_given)
+			printf("\n");
 	}
 
 	//Free all memory, print the summary, and shut down
