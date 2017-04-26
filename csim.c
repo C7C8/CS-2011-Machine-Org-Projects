@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include "cachelab.h"
 #include "cmdline.h"
-char* bytestr(uint64_t num);
+
 const size_t INPUT_BUF_SIZE = 1024;
 
 /**
@@ -27,6 +26,9 @@ typedef struct {
 
 //Store a line in the cache. Returns non-zero if an eviction was made, else returns 0.
 int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_MASK);
+
+//Recursively free a cache line's memory. Only used for the shutdown sequence.
+void freeCacheLine(CacheLine* target);
 
 int main(int argc, char** argv)
 {
@@ -90,6 +92,7 @@ int main(int argc, char** argv)
 				}
 				break;
 			}
+
 			if (cur->tag == (addr & TAG_MASK)){
 				cacheHits++;
 				if (operator == 'M') {
@@ -121,17 +124,11 @@ int main(int argc, char** argv)
 
 	//Free all memory, print the summary, and shut down
 	free(inputBuf);
-	//TODO: Free cache lines!
+	for (int i = 0; i < args.associativity_arg; i++)
+		freeCacheLine(cache[i].cacheLines);
 	free(cache);
     printSummary(cacheHits, cacheMisses, cacheEvictions);
     return 0;
-}
-
-char* bytestr(uint64_t num) {
-	char *str = malloc(32); //hey look, a memory leak!
-	for (char i = 0; i < 32; i++)
-		str[31 - i] = (char)((1<<i) & num ? '1' : '0');
-	return str;
 }
 
 int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_MASK){
@@ -169,4 +166,12 @@ int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_
 		set->cacheLines = newLine;
 		return 1;
 	}
+}
+
+void freeCacheLine(CacheLine* target){
+	if (target == NULL)
+		return;
+	if (target->next != NULL)
+		freeCacheLine(target->next);
+	free(target);
 }
