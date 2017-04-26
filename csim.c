@@ -120,15 +120,17 @@ int main(int argc, char** argv)
 			if (cur->tag == (addr & TAG_MASK)){
 				cacheHits++;
 
-				//Move current up in life
-				if (cur->next != NULL)
-					cur->next->prev = cur->prev;
-				if (cur->prev != NULL)
-					cur->prev->next = cur->next;
-				cur->prev = NULL;
-				if (cur != selectedSet->cacheLines)
+				//Move curr up in life, if needed
+				if (cur != selectedSet->cacheLines) {
+					if (cur->prev != NULL)
+						cur->prev->next = cur->next;
+					if (cur->next != NULL)
+						cur->next->prev = cur->prev;
+					selectedSet->cacheLines->prev = cur;
 					cur->next = selectedSet->cacheLines;
-				selectedSet->cacheLines = cur;
+					cur->prev = NULL;
+					selectedSet->cacheLines = cur;
+				}
 
 				if (args.verbose_given)
 					printf("hit");
@@ -170,8 +172,9 @@ int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_
 		if (last == NULL) //that was easy
 			set->cacheLines = newLine;
 		else {
-			last->next = newLine;
-			newLine->prev = last;
+			set->cacheLines->prev = newLine;
+			newLine->next = set->cacheLines;
+			set->cacheLines = newLine;
 		}
 		set->size++;
 		return 0;
