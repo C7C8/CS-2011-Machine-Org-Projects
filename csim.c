@@ -32,17 +32,8 @@ int main(int argc, char** argv)
 {
     struct gengetopt_args_info args;
 	cmdline_parser(argc, argv, &args);
-	if (args.verbose_given) {
-		printf("Set index bits: %d\n", args.set_index_bits_arg);
-		printf("Associativity: %d\n", args.associativity_arg);
-		printf("Block bits: %d\n", args.block_bits_arg);
-		if (!args.tracefile_given)
-			printf("No tracefile provided, using stdin instead\n");
-		else
-			printf("Tracefile: %s\n", args.tracefile_arg);
-	}
 
-	FILE* tracefile = stdin;
+	FILE* tracefile = stdin; //If we don't receive a tracefile, just read from stdin. This allows user interactivity!
 	if (args.tracefile_given && (tracefile = fopen(args.tracefile_arg, "r")) == NULL){
 		perror("Couldn't access tracefile");
 		abort();
@@ -51,25 +42,11 @@ int main(int argc, char** argv)
 	//Now that the setup work is all done, let's do some some cache simulation work!
 	int cacheHits = 0, cacheMisses = 0, cacheEvictions = 0;
 	const int CACHE_SETS = 1 << args.set_index_bits_arg;
-	//const int TAG_BITS = 64 - args.block_bits_arg - args.set_index_bits_arg;
 	const uint64_t BLOCK_MASK = (const unsigned int)(1 << args.block_bits_arg) - 1;
 	const uint64_t SET_MASK = ((1 << (args.set_index_bits_arg + args.block_bits_arg )) - 1) ^ BLOCK_MASK;
 	const uint64_t TAG_MASK = ~(BLOCK_MASK | SET_MASK);
 	char* inputBuf = (char*)malloc(INPUT_BUF_SIZE);
-	srand((unsigned int)time(0));
-
-	//Allocate memory for cache
-	if (args.verbose_given)
-		printf("Allocating cache with %d sets of %d lines each; total cache size (in program memory) %d bytes\n", CACHE_SETS,
-			   args.associativity_arg,
-			   CACHE_SETS * args.associativity_arg * (int)sizeof(CacheLine));
 	CacheSet* cache = (CacheSet*)malloc(sizeof(CacheSet) * CACHE_SETS);
-
-	if (args.verbose_given) {
-		printf("Block mask:\t%s\n", bytestr(BLOCK_MASK));
-		printf("Set mask:\t%s\n", bytestr(SET_MASK));
-		printf("Tag mask:\t%s\n", bytestr(TAG_MASK));
-	}
 
 	//Input loop; read a line, check if the first character is 'I'. If so, discard it (we don't care about instruction
 	//loads). Else, process it according to whether it's a load (L), store (S), or modify (M). After the memory access
