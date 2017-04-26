@@ -955,7 +955,7 @@ int main(int argc, char** argv)
 	//type, the first number is hex for the address accessed while the second is a number indicating the amount accessed.
 	while (1){
 		memset(inputBuf, 0, INPUT_BUF_SIZE);
-		if (getline(&inputBuf, (size_t*)&INPUT_BUF_SIZE, tracefile) == -1)
+		if (fgets(inputBuf, INPUT_BUF_SIZE, tracefile) == NULL)
 			break; //EOF or some error condition
 
 		if (inputBuf[0] == 'I')
