@@ -183,11 +183,12 @@ int storeLine(uint64_t addr, CacheSet* set, const int ASSOC, const uint64_t TAG_
 	}
 	else {
 		//Serve eviction notice and change out the locks
-		if (last->prev != NULL)
+		if (ASSOC > 1) {
 			last->prev->next = NULL;
-		free(last);
-		newLine->next = set->cacheLines;
-		set->cacheLines->prev = newLine;
+			free(last);
+			newLine->next = set->cacheLines;
+			set->cacheLines->prev = newLine;
+		}
 		set->cacheLines = newLine;
 		return 1;
 	}
