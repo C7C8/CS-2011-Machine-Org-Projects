@@ -70,23 +70,23 @@ int main(int argc, char** argv)
 
 		//Cache set grabbed, now search through its cache lines to find a matching tag (if one exists).
 		if (args.verbose_given)
-			printf("%c %lX: ", operator, addr);
+			printf("%c %lx,%lu ", operator, addr, size);
 		for (CacheLine* cur = selectedSet->cacheLines;; cur = cur->next){
 			if (cur == NULL){
 				//Store a line in the cache, incrementing the eviction count if needed. If the op was a modify call,
 				//increase the hit counter by one (modfy = R+W).
 				if (args.verbose_given)
-					printf("miss");
+					printf("miss ");
 				cacheMisses++;
 				if (storeLine(addr, selectedSet, args.associativity_arg, TAG_MASK)){
 					cacheEvictions++;
 					if (args.verbose_given)
-						printf(", eviction");
+						printf("eviction ");
 				}
 				if (operator == 'M'){
 					cacheHits++;
 					if (args.verbose_given)
-						printf(", hit");
+						printf("hit ");
 				}
 				break;
 			}
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 				}
 
 				if (args.verbose_given)
-					printf("hit");
+					printf("hit ");
 				break;
 			}
 		}
