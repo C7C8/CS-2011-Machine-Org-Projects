@@ -1,1 +1,12 @@
 .csim_results
+sourec-handin.tar
+driver.py
+Cachelab.pdf
+csim
+csim-ref
+test-csim
+test-trans
+trace.f0
+trace.f1
+tracegen
+traces/*
