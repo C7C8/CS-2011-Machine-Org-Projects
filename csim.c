@@ -1,3 +1,5 @@
+//crmyers (Christopher Myers) 2017
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
