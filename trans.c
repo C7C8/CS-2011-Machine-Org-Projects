@@ -8,6 +8,7 @@
  * on a 1KB direct mapped cache with a block size of 32 bytes.
  */
 #include <stdio.h>
+#include <string.h>
 #include "cachelab.h"
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
@@ -23,9 +24,24 @@ char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
 	register int i, j;
-	for (j = 0; j < M; j++)
-		for (i = 0; i < N; i++)
-			A[i][j] = B[j][i];
+
+	//This isn't code I used when writing this (that would be the stupidest thing I've ever done, and that's saying something!).
+	//It's what came to mind when I wrote this.
+	//https://gist.githubusercontent.com/alessonforposterity/832da4fab11e10609dad/raw/258df12378399919ae088ba8731a7571d9c2c947/drgn.txt
+	register int a0, a1, a2, a3;
+
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < M; j += 4) {
+			a0 = A[i][j];
+			a1 = A[i][j+1];
+			a2 = A[i][j+2];
+			a3 = A[i][j+3];
+			B[j][i] = a0;
+			B[j+1][i] = a1;
+			B[j+2][i] = a2;
+			B[j+3][i] = a3;
+		}
+	}
 }
 
 /* 
