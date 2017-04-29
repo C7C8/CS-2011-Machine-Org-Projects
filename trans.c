@@ -26,7 +26,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	//This isn't code I used when writing this (that would be the stupidest thing I've ever done, and that's saying something!).
 	//It's what came to mind when I wrote this.
 	//https://gist.githubusercontent.com/alessonforposterity/832da4fab11e10609dad/raw/258df12378399919ae088ba8731a7571d9c2c947/drgn.txt
-	register int i, j, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9;
+	register int i, j, a0, a1, a2, a3, a4, a5, a6, a7;
 
 	for (j = 0; j < M; j += 8) {
 		for (i = 0; i < N; i++) {
@@ -38,8 +38,6 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 			a5 = A[i][j+5];
 			a6 = A[i][j+6];
 			a7 = A[i][j+7];
-			a8 = A[i][j+8];
-			a9 = A[i][j+9];
 			B[j][i] = a0;
 			B[j+1][i] = a1;
 			B[j+2][i] = a2;
@@ -48,8 +46,6 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 			B[j+5][i] = a5;
 			B[j+6][i] = a6;
 			B[j+7][i] = a7;
-			B[j+8][i] = a8;
-			B[j+9][i] = a9;
 		}
 	}
 }
