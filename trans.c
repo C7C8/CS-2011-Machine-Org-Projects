@@ -53,14 +53,14 @@ char oddsample_desc[] = "Inner crush";
 void oddsample(int M, int N, int A[N][M], int B[M][N]) {
 	int x, y;
 
-	//Approach the center columns from the outer columns. Alternate sides in an attempt to
+	//Approach the center columns from the outer columns. Alternate sides in an attempt to be competent
 	for (x = 0; x <= N / 2; x++) {
 		for (y = 0; y < M; y++) {
 			//Left side
 			B[y][x] = A[x][y];
 
 			//Right side
-			B[y][N-x] = A[N-x][y];
+			B[y][N-x-1] = A[N-x-1][y];
 		}
 	}
 }
