@@ -58,14 +58,6 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	}
 }
 
-/* 
- * You can define additional transpose functions below. We've defined
- * a simple one below to help you get started. 
- */
-
-/* 
- * trans - A simple baseline transpose function, not optimized for the cache.
- */
 char diag_desc[] = "Diagonal scan fuckery";
 void diag(int M, int N, int A[N][M], int B[M][N])
 {
@@ -95,6 +87,28 @@ void diag(int M, int N, int A[N][M], int B[M][N])
 			j++;
 		}
 	}
+}
+
+char optitrans_desc[] = "Square transpose fuckery thingy";
+void optitrans(int M, int N, int A[N][M], int B[M][N]){
+	if (M != N) //This algorithm deals with square matricies, it can't process anything else.
+		return transpose_submit(M, N, A, B);
+
+	register int i , j, tmp;
+
+	//First copy A->B...
+	for (j = 0; j < M; j++)
+		for (i = 0; i < M; i++)
+			B[i][j] = A[i][j];
+
+	//Now do an in-place transpose, which is easy since M=N
+	for (j = 0; j < M; j++){
+		for (i = 0; i < j; i++){
+			tmp = B[i][j];
+			B[i][j] = B[j][i];
+			B[j][i] = tmp;
+		}
+	}
 
 }
 
@@ -107,12 +121,9 @@ void diag(int M, int N, int A[N][M], int B[M][N])
  */
 void registerFunctions()
 {
-	/* Register your solution function */
 	registerTransFunction(transpose_submit, transpose_submit_desc);
-
-	/* Register any additional transpose functions */
 	registerTransFunction(diag, diag_desc);
-
+	registerTransFunction(optitrans, optitrans_desc);
 }
 
 /* 
