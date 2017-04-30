@@ -17,7 +17,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	//This link isn't code I used when writing this (that would be the stupidest thing I've ever done, and that's saying something!).
 	//It's what came to mind when I wrote this.
 	//https://gist.githubusercontent.com/alessonforposterity/832da4fab11e10609dad/raw/258df12378399919ae088ba8731a7571d9c2c947/drgn.txt
-	register int i, j, a0, a1, a2, a3, a4, a5, a6, a7;
+	int i, j, a0, a1, a2, a3, a4, a5, a6, a7;
 
 	for (j = 0; j < M;) {
 		for (i = 0; i < N; i++) {
@@ -49,9 +49,25 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	}
 }
 
+char oddsample_desc[] = "Inner crush";
+void oddsample(int M, int N, int A[N][M], int B[M][N]) {
+	int x, y;
+
+	//Approach the center columns from the outer columns. Alternate sides in an attempt to
+	for (x = 0; x <= N / 2; x++) {
+		for (y = 0; y < M; y++) {
+			//Left side
+			B[y][x] = A[x][y];
+
+			//Right side
+			B[y][N-x] = A[N-x][y];
+		}
+	}
+}
 void registerFunctions()
 {
 	registerTransFunction(transpose_submit, transpose_submit_desc);
+	registerTransFunction(oddsample, oddsample_desc);
 }
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N])
