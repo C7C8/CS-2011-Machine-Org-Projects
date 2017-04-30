@@ -14,7 +14,7 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
-	//This isn't code I used when writing this (that would be the stupidest thing I've ever done, and that's saying something!).
+	//This link isn't code I used when writing this (that would be the stupidest thing I've ever done, and that's saying something!).
 	//It's what came to mind when I wrote this.
 	//https://gist.githubusercontent.com/alessonforposterity/832da4fab11e10609dad/raw/258df12378399919ae088ba8731a7571d9c2c947/drgn.txt
 	register int i, j, a0, a1, a2, a3, a4, a5, a6, a7;
