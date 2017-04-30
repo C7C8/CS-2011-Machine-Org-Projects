@@ -10,3 +10,5 @@ trace.f0
 trace.f1
 tracegen
 traces/*
+trace.*
+.marker

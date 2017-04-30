@@ -89,17 +89,35 @@ void diag(int M, int N, int A[N][M], int B[M][N])
 	}
 }
 
-char optitrans_desc[] = "Square transpose fuckery thingy";
+char optitrans_desc[] = "Square transpose fuckery";
 void optitrans(int M, int N, int A[N][M], int B[M][N]){
 	if (M != N) //This algorithm deals with square matricies, it can't process anything else.
 		return transpose_submit(M, N, A, B);
 
 	register int i , j, tmp;
+	register int a0, a1, a2, a3, a4, a5, a6, a7;
 
 	//First copy A->B...
-	for (j = 0; j < M; j++)
-		for (i = 0; i < M; i++)
-			B[i][j] = A[i][j];
+	for (i = 0; i < M; i++){
+		for (j = 0; j < M; j+=8){
+			a0 = A[i][j];
+			a1 = A[i][j+1];
+			a2 = A[i][j+2];
+			a3 = A[i][j+3];
+			a4 = A[i][j+4];
+			a5 = A[i][j+5];
+			a6 = A[i][j+6];
+			a7 = A[i][j+7];
+			B[i][j] = a0;
+			B[i][j+1] = a1;
+			B[i][j+2] = a2;
+			B[i][j+3] = a3;
+			B[i][j+4] = a4;
+			B[i][j+5] = a5;
+			B[i][j+6] = a6;
+			B[i][j+7] = a7;
+		}
+	}
 
 	//Now do an in-place transpose, which is easy since M=N
 	for (j = 0; j < M; j++){
