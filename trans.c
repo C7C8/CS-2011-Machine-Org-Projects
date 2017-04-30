@@ -66,16 +66,33 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 /* 
  * trans - A simple baseline transpose function, not optimized for the cache.
  */
-char trans_desc[] = "Simple row-wise scan transpose";
-void trans(int M, int N, int A[N][M], int B[M][N])
+char diag_desc[] = "Diagonal scan fuckery";
+void diag(int M, int N, int A[N][M], int B[M][N])
 {
+	//Do some diagonal fuckery, starting from the bottom left and scanning right+down until an edge is hit. Yes, this is
+	//as fucky as it sounds.
+	register int i, j, ix, iy;
+	//register int a0, a2, a3, a4, a5, a6, a7;
 
-	int i, j, tmp;
+	//Process left edge from bottom up
+	for (iy = N; iy >= 0; iy--){
+		i = 0;
+		j = iy;
+		while (i < N && j < M){
+			B[j][i] = A[i][j];
+			i++;
+			j++;
+		}
+	}
 
-	for (i = 0; i < N; i++) {
-		for (j = 0; j < M; j++) {
-			tmp = A[i][j];
-			B[j][i] = tmp;
+	//Process top edge from left+1 right
+	for (ix = 1; ix < N; ix++){
+		i = ix;
+		j = 0;
+		while (i < N && j < M){
+			B[j][i] = A[i][j];
+			i++;
+			j++;
 		}
 	}
 
@@ -94,7 +111,7 @@ void registerFunctions()
 	registerTransFunction(transpose_submit, transpose_submit_desc);
 
 	/* Register any additional transpose functions */
-	//registerTransFunction(trans, trans_desc);
+	registerTransFunction(diag, diag_desc);
 
 }
 
