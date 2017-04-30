@@ -28,25 +28,33 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	//https://gist.githubusercontent.com/alessonforposterity/832da4fab11e10609dad/raw/258df12378399919ae088ba8731a7571d9c2c947/drgn.txt
 	register int i, j, a0, a1, a2, a3, a4, a5, a6, a7;
 
-	for (j = 0; j < M; j += 8) {
+	for (j = 0; j < M;) {
 		for (i = 0; i < N; i++) {
 			a0 = A[i][j];
 			a1 = A[i][j+1];
 			a2 = A[i][j+2];
 			a3 = A[i][j+3];
-			a4 = A[i][j+4];
-			a5 = A[i][j+5];
-			a6 = A[i][j+6];
-			a7 = A[i][j+7];
+			if (M == 32){
+				a4 = A[i][j+4];
+				a5 = A[i][j+5];
+				a6 = A[i][j+6];
+				a7 = A[i][j+7];
+			}
 			B[j][i] = a0;
 			B[j+1][i] = a1;
 			B[j+2][i] = a2;
 			B[j+3][i] = a3;
-			B[j+4][i] = a4;
-			B[j+5][i] = a5;
-			B[j+6][i] = a6;
-			B[j+7][i] = a7;
+			if (M == 32) {
+				B[j + 4][i] = a4;
+				B[j + 5][i] = a5;
+				B[j + 6][i] = a6;
+				B[j + 7][i] = a7;
+			}
 		}
+		if (M == 32)
+			j += 8;
+		else
+			j += 4;
 	}
 }
 
