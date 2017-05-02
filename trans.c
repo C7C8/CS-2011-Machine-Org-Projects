@@ -55,8 +55,8 @@ void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
 	int i, j, blockI, blockJ, tI, tJ;
 	int a0, a1, a2, a3;
 
-	for (i = 0; i < M; i += 4){
-		for (j = 0; j < N; j += 4){
+	for (j = 0; j < N; j += 4){
+		for (i = 0; i < M; i += 4){
 			//Blocks are 4x4. These outer two loops operate on a block level, so now we need to
 			//transpose things on the level of actual array elements. This needs another two i/j
 			//variables, named blockI and blockJ to follow the same naming conventions (i.e.
