@@ -978,7 +978,7 @@ int main(int argc, char** argv)
 		for (CacheLine* cur = selectedSet->cacheLines;; cur = cur->next){
 			if (cur == NULL){
 				//Store a line in the cache, incrementing the eviction count if needed. If the op was a modify call,
-				//increase the hit counter by one (modfy = R+W).
+				//increase the hit counter by one (modify = R+W).
 				if (args.verbose_given)
 					printf("miss ");
 				cacheMisses++;

@@ -7,10 +7,7 @@
  * A transpose function is evaluated by counting the number of misses
  * on a 1KB direct mapped cache with a block size of 32 bytes.
  */
-#include "stdio.h"
 #include "cachelab.h"
-
-int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 
 char rectanglemode_desc[] = "Rectangle blockmode";
 void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
@@ -89,18 +86,3 @@ void registerFunctions()
 	registerTransFunction(transpose_submit, transpose_submit_desc);
 	registerTransFunction(rectanglemode, rectanglemode_desc);
 }
-
-int is_transpose(int M, int N, int A[N][M], int B[M][N])
-{
-	int i, j;
-
-	for (i = 0; i < N; i++) {
-		for (j = 0; j < M; ++j) {
-			if (A[i][j] != B[j][i]) {
-				return 0;
-			}
-		}
-	}
-	return 1;
-}
-
