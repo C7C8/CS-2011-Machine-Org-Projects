@@ -7,6 +7,7 @@
  * A transpose function is evaluated by counting the number of misses
  * on a 1KB direct mapped cache with a block size of 32 bytes.
  */
+#include "stdio.h"
 #include "cachelab.h"
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
@@ -49,25 +50,34 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	}
 }
 
-char oddsample_desc[] = "Inner crush";
-void oddsample(int M, int N, int A[N][M], int B[M][N]) {
-	int x, y;
+char rectanglemode_desc[] = "Rectangle blockmode";
+void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
+	int i, j, blockI, blockJ, tI, tJ;
+	int a0, a1, a2, a3;
 
-	//Approach the center columns from the outer columns. Alternate sides in an attempt to be competent
-	for (x = 0; x <= N / 2; x++) {
-		for (y = 0; y < M; y++) {
-			//Left side
-			B[y][x] = A[x][y];
+	for (i = 0; i < M; i += 4){
+		for (j = 0; j < N; j += 4){
+			//Blocks are 4x4. These outer two loops operate on a block level, so now we need to
+			//transpose things on the level of actual array elements. This needs another two i/j
+			//variables, named blockI and blockJ to follow the same naming conventions (i.e.
+			//please give me my style points?). tI and tJ are temporary variables so we don't have
+			//to store the indexes that are to be accessed.
 
-			//Right side
-			B[y][N-x-1] = A[N-x-1][y];
+			for (blockI = 0; blockI < 4; blockI++){
+				for (blockJ = 0; blockJ < 4; blockJ++){
+					tI = i + blockI;
+					tJ = j + blockJ;
+					B[tJ][tI] = A[tI][tJ];
+				}
+			}
 		}
 	}
+
 }
 void registerFunctions()
 {
 	registerTransFunction(transpose_submit, transpose_submit_desc);
-	registerTransFunction(oddsample, oddsample_desc);
+	registerTransFunction(rectanglemode, rectanglemode_desc);
 }
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N])
