@@ -12,3 +12,4 @@ tracegen
 traces/*
 trace.*
 .marker
+*.tar
