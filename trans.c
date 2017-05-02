@@ -52,8 +52,8 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 
 char rectanglemode_desc[] = "Rectangle blockmode";
 void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
-	int i, j, blockI, tI;
-	int a0, a1, a2, a3;
+	int i, j, blockI, tI, tI2;
+	int a0, a1, a2, a3, a4, a5, a6, a7;
 
 	for (j = 0; j < N; j += 4){
 		for (i = 0; i < M; i += 4){
@@ -63,17 +63,26 @@ void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
 			//variables, named blockI and blockJ to follow the same naming conventions (i.e.
 			//please give me my style points?). tI and tJ are temporary variables so we don't have
 			//to store the indexes that are to be accessed.
-			for (blockI = 0; blockI < 4; blockI++){
+			for (blockI = 0; blockI < 4; blockI += 2){
 				tI = i + blockI;
+				tI2 = tI + 1;
 
 				a0 = A[tI][j];
 				a1 = A[tI][j+1];
 				a2 = A[tI][j+2];
 				a3 = A[tI][j+3];
+				a4 = A[tI2][j];
+				a5 = A[tI2][j+1];
+				a6 = A[tI2][j+2];
+				a7 = A[tI2][j+3];
 				B[j][tI] = a0;
 				B[j+1][tI] = a1;
 				B[j+2][tI] = a2;
 				B[j+3][tI] = a3;
+				B[j][tI2] = a4;
+				B[j+1][tI2] = a5;
+				B[j+2][tI2] = a6;
+				B[j+3][tI2] = a7;
 			}
 		}
 	}
