@@ -52,23 +52,28 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 
 char rectanglemode_desc[] = "Rectangle blockmode";
 void rectanglemode(int M, int N, int A[N][M], int B[M][N]) {
-	int i, j, blockI, blockJ, tI, tJ;
+	int i, j, blockI, tI;
 	int a0, a1, a2, a3;
 
 	for (j = 0; j < N; j += 4){
-		for (i = 0; i < M; i += 4){
-			//Blocks are 4x4. These outer two loops operate on a block level, so now we need to
+		for (i = 0; i < M; i += 8){
+
+			//Blocks are 8x4. These outer two loops operate on a block level, so now we need to
 			//transpose things on the level of actual array elements. This needs another two i/j
 			//variables, named blockI and blockJ to follow the same naming conventions (i.e.
 			//please give me my style points?). tI and tJ are temporary variables so we don't have
 			//to store the indexes that are to be accessed.
+			for (blockI = 0; blockI < 8; blockI++){
+				tI = i + blockI;
 
-			for (blockI = 0; blockI < 4; blockI++){
-				for (blockJ = 0; blockJ < 4; blockJ++){
-					tI = i + blockI;
-					tJ = j + blockJ;
-					B[tJ][tI] = A[tI][tJ];
-				}
+				a0 = A[tI][j];
+				a1 = A[tI][j+1];
+				a2 = A[tI][j+2];
+				a3 = A[tI][j+3];
+				B[j][tI] = a0;
+				B[j+1][tI] = a1;
+				B[j+2][tI] = a2;
+				B[j+3][tI] = a3;
 			}
 		}
 	}
