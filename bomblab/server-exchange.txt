@@ -1,0 +1,13 @@
+GET /submission/?userid=xxxxxxx&userpwd=RDyYL7BcCo6zFFR7&lab=d17&result=42%3Adefused%3A1%3AWas+it+over+when+the+Germans+bombed+Pearl+Harbor%3F+Hell+no%21&submit=submit HTTP/1.0
+
+HTTP/1.0 200 OK
+Connection: close
+MIME-Version: 1.0
+Content-Type: text/plain
+
+OK
+
+
+====================
+
+HTTP/1.0 200 OK\r\nConnection: close\r\nMIME-Version: 1.0\r\nContent-Type: text/plain\r\n\r\nOK

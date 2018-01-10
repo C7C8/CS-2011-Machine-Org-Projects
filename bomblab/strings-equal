@@ -1,0 +1,10 @@
+53
+48 89 f3
+e8 45 fb ff ff
+48 89 df
+e8 3d fb ff ff
+31 c0
+5b
+c3
+
+53 48 89 f3 e8 45 fb ff ff 48 89 df e8 3d fb ff ff 31 c0 5b c3
